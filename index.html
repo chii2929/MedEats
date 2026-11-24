@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MedEats 調劑台補給站</title>
+<style>
+  :root {
+    --bg-main: #F6F6F6;
+    --bg-card: #FFFFFF;
+    --text-primary: #000000;
+    --text-secondary: #545454;
+    --ue-green: #06C167;
+    --ue-green-dark: #05A357;
+    --ue-green-light: #E6F9F0;
+    --ue-black: #141414;
+    --border: #EEEEEE;
+    --warning: #E56B1F;
+    --warning-light: #FFF3EB;
+    --danger: #D93025;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    padding-bottom: 115px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Uber Eats 風格頂部導覽列 */
+  header {
+    background-color: var(--bg-card);
+    padding: 14px 18px;
+    position: sticky;
+    top: 0;
+    z-index: 120;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brand-logo {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--ue-black);
+  }
+
+  .brand-logo span {
+    color: var(--ue-green);
+  }
+
+  .delivery-pill {
+    background-color: var(--bg-main);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-pill-gray {
+    background: var(--bg-main);
+    border: none;
+    color: var(--text-primary);
+    padding: 8px 13px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background 0.15s;
+  }
+
+  .btn-pill-gray:active {
+    background: #E2E2E2;
+  }
+
+  .btn-pill-black {
+    background: var(--ue-black);
+    border: none;
+    color: #FFFFFF;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: opacity 0.15s;
+  }
+
+  .btn-pill-black:active {
+    opacity: 0.8;
+  }
+
+  /* 膠囊型搜尋框 */
+  .search-bar {
+    position: relative;
+    width: 100%;
+  }
+
+  .search-bar input {
+    width: 100%;
+    padding: 11px 16px 11px 40px;
+    border-radius: 24px;
+    border: none;
+    background-color: var(--bg-main);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    outline: none;
+    transition: box-shadow 0.2s;
+  }
+
+  .search-bar input:focus {
+    box-shadow: inset 0 0 0 2px var(--ue-black);
+    background-color: #FFF;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-primary);
+    font-size: 15px;
+  }
+
+  /* Uber Eats 店家橫幅與分類 Tab */
+  .store-banner {
+    background: var(--bg-card);
+    padding: 12px 18px 0;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 103px;
+    z-index: 110;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  }
+
+  .store-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+
+  .store-rating {
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .zone-tabs {
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .zone-tabs::-webkit-scrollbar { display: none; }
+
+  .zone-tab {
+    padding: 10px 4px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .zone-tab.active {
+    color: var(--ue-black);
+    border-bottom-color: var(--ue-black);
+  }
+
+  /* 藥品列表容器與手風琴展開面板 */
+  .container {
+    padding: 12px 16px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .accordion-group {
+    background-color: var(--bg-card);
+    border-radius: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  .accordion-header {
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background-color: var(--bg-card);
+    border-radius: 16px;
+    user-select: none;
+    transition: background-color 0.15s;
+  }
+
+  .accordion-group.open .accordion-header {
+    position: sticky;
+    top: 185px;
+    z-index: 90;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .accordion-header:active {
+    background-color: #FAFAFA;
+  }
+
+  .accordion-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .slot-badge-lg {
+    background-color: var(--ue-black);
+    color: #FFF;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .slot-count-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .slot-selected-pill {
+    background-color: var(--ue-green-light);
+    color: var(--ue-green-dark);
+    font-size: 12px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 12px;
+  }
+
+  .accordion-arrow {
+    font-size: 14px;
+    color: var(--text-secondary);
+    transition: transform 0.25s ease;
+  }
+
+  .accordion-group.open .accordion-arrow {
+    transform: rotate(180deg);
+  }
+
+  .accordion-body {
+    display: none;
+    padding: 6px 16px 12px;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .accordion-group.open .accordion-body {
+    display: block;
+  }
+
+  /* Uber Eats 餐點橫向卡片 */
+  .med-card {
+    padding: 14px 8px;
+    margin: 0 -8px;
+    border-radius: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.15s;
+  }
+
+  .med-card:not(.sortable-mode):active {
+    background-color: #F2F4F3;
+  }
+
+  .med-card.selected {
+    background-color: #F6FBF8;
+  }
+
+  .med-card:last-child {
+    border-bottom: none;
+  }
+
+  .med-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .med-brand {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tag-note {
+    background-color: var(--warning-light);
+    color: var(--warning);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+
+  .med-actual {
+    font-size: 13px;
+    color: var(--ue-green-dark);
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .med-generic {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.35;
+    margin-bottom: 6px;
+  }
+
+  .btn-edit-mini {
+    background: var(--bg-main);
+    border: none;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+
+  /* 排序模式控制列與拖曳把手樣式 */
+  .slot-sort-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 6px;
+    border-bottom: 1px dashed var(--border);
+    margin-bottom: 4px;
+  }
+
+  .slot-sort-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .btn-sort-toggle {
+    background: var(--bg-main);
+    border: 1px solid #DCDCDC;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+  }
+
+  .btn-sort-toggle.active {
+    background: var(--ue-black);
+    color: #FFFFFF;
+    border-color: var(--ue-black);
+  }
+
+  .med-card.sortable-mode {
+    background-color: #FAFAFA;
+    border-radius: 12px;
+    padding: 12px 10px;
+    margin: 6px 0;
+    border: 1px dashed #CCCCCC;
+    border-bottom: 1px dashed #CCCCCC;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .med-card.dragging {
+    opacity: 0.45;
+    background-color: var(--ue-green-light);
+    border-color: var(--ue-green);
+  }
+
+  .drag-handle-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding-right: 4px;
+    color: var(--text-secondary);
+    user-select: none;
+  }
+
+  .drag-grip {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--ue-black);
+    line-height: 1;
+    padding: 2px 4px;
+  }
+
+  .sort-arrow-btns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .sort-arrow-btns button {
+    background: #FFFFFF;
+    border: 1px solid #D5D5D5;
+    border-radius: 6px;
+    width: 24px;
+    height: 22px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--ue-black);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sort-arrow-btns button:active {
+    background: var(--ue-black);
+    color: #FFF;
+  }
+
+  /* 右側餐點圖 + 懸浮圓形按鈕 (Uber Eats 經典設計) */
+  .med-visual-wrap {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    flex-shrink: 0;
+  }
+
+  .med-img-box {
+    width: 88px;
+    height: 88px;
+    border-radius: 12px;
+    background-color: var(--bg-main);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .med-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* 懸浮在圖片右下角的加入按鈕 */
+  .ue-add-btn {
+    position: absolute;
+    bottom: -6px;
+    right: -6px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: #FFFFFF;
+    color: var(--ue-black);
+    border: 1px solid #E0E0E0;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.16);
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .ue-add-btn.checked {
+    background-color: var(--ue-green);
+    color: #FFFFFF;
+    border-color: var(--ue-green);
+    font-size: 15px;
+  }
+
+  /* 懸浮計數器膠囊 */
+  .ue-stepper {
+    position: absolute;
+    bottom: -6px;
+    right: -6px;
+    background-color: var(--ue-black);
+    color: #FFF;
+    border-radius: 20px;
+    padding: 3px 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  }
+
+  .ue-stepper button {
+    background: none;
+    border: none;
+    color: #FFF;
+    font-size: 16px;
+    font-weight: 700;
+    width: 22px;
+    height: 24px;
+    cursor: pointer;
+  }
+
+  .ue-stepper span {
+    font-size: 13px;
+    font-weight: 800;
+    min-width: 14px;
+    text-align: center;
+  }
+
+  /* 底部懸浮購物車 Bar (Uber Eats 黑色結帳條) */
+  .bottom-bar {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 760px;
+    background-color: var(--ue-black);
+    color: #FFF;
+    border-radius: 14px;
+    padding: 10px 12px;
+    display: flex;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+    z-index: 200;
+  }
+
+  .bar-btn {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: opacity 0.15s;
+  }
+
+  .bar-btn:active {
+    opacity: 0.85;
+  }
+
+  .bar-btn-cart {
+    background-color: var(--ue-green);
+    color: #000000;
+  }
+
+  .bar-btn-staging {
+    background-color: #2B2B2B;
+    color: #FFFFFF;
+  }
+
+  .badge-pill {
+    background-color: rgba(0, 0, 0, 0.15);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .bar-btn-staging .badge-pill {
+    background-color: var(--warning);
+    color: #FFF;
+  }
+
+  /* 彈出視窗 Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0,0,0,0.55);
+    z-index: 300;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-overlay.open {
+    display: flex;
+  }
+
+  .modal-sheet {
+    background-color: var(--bg-card);
+    width: 100%;
+    max-width: 760px;
+    max-height: 90vh;
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    overflow-y: auto;
+    animation: slideUp 0.25s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .btn-close {
+    background: var(--bg-main);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 清單項目樣式 */
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+
+  .list-item-info {
+    flex: 1;
+  }
+
+  .list-item-title {
+    font-weight: 800;
+    font-size: 15px;
+  }
+
+  .list-item-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+  }
+
+  .btn-move-staging {
+    background-color: var(--warning-light);
+    color: var(--warning);
+    border: 1px solid var(--warning);
+    padding: 7px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-done-staging {
+    background-color: var(--ue-green-light);
+    color: var(--ue-green-dark);
+    border: 1px solid var(--ue-green);
+    padding: 7px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* 表單樣式 */
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+  }
+
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1px solid #DCDCDC;
+    font-size: 14px;
+    background-color: var(--bg-main);
+    outline: none;
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--ue-black);
+    background-color: #FFF;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .form-row .form-group {
+    flex: 1;
+  }
+
+  .img-helper-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* 專屬小浮水印設計 */
+  .watermark {
+    text-align: center;
+    padding: 26px 16px 14px;
+    font-size: 12px;
+    color: #757575;
+    letter-spacing: 0.5px;
+  }
+
+  .watermark span {
+    background-color: #FFFFFF;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    border: 1px solid #E5E5E5;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* 自訂提示訊息 Toast & 確認框 */
+  .toast-msg {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background-color: var(--ue-black);
+    color: #FFF;
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+  }
+
+  .toast-msg.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .confirm-dialog {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .confirm-dialog.open {
+    display: flex;
+  }
+
+  .confirm-box {
+    background: var(--bg-card);
+    padding: 22px;
+    border-radius: 16px;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  .confirm-box p {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+
+  .confirm-btns {
+    display: flex;
+    gap: 10px;
+  }
+
+  .confirm-btns button {
+    flex: 1;
+    padding: 11px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* 圖片放大檢視 */
+  .img-zoom-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 400;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .img-zoom-overlay.open { display: flex; }
+  .img-zoom-overlay img {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 14px;
+    background: #FFF;
+  }
+</style>
+</head>
+<body>
+
+<!-- 頂部浮動通知 -->
+<div class="toast-msg" id="toastMsg"></div>
+
+<header>
+  <div class="header-top">
+    <div class="brand">
+      <div class="brand-logo">Med<span>Eats</span></div>
+      <div class="delivery-pill">⚡ 10-15 分鐘補完</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-pill-gray" onclick="openBackupModal()">備份/分享</button>
+      <button class="btn-pill-black" onclick="openEditModal()">＋ 新增藥品</button>
+    </div>
+  </div>
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="在調劑台內搜尋原廠名、台廠名、學名..." oninput="renderMedList()">
+  </div>
+</header>
+
+<!-- Uber Eats 店家資訊與分區導覽 -->
+<div class="store-banner">
+  <div class="store-meta">
+    <span><span class="store-rating">★ 5.0</span> (準時下班調劑台) · 點擊儲位展開清單</span>
+    <button class="btn-edit-mini" onclick="toggleAllSlots()">全部展開/收合</button>
+  </div>
+  <div class="zone-tabs" id="zoneTabs">
+    <button class="zone-tab active" data-zone="ALL" onclick="selectZone('ALL')">全部儲位</button>
+    <button class="zone-tab" data-zone="TOP" onclick="selectZone('TOP')">上層 (D區)</button>
+    <button class="zone-tab" data-zone="LEFT" onclick="selectZone('LEFT')">左抽屜 (d-1-1~5)</button>
+    <button class="zone-tab" data-zone="RIGHT" onclick="selectZone('RIGHT')">右抽屜 (d-1-6~10)</button>
+  </div>
+</div>
+
+<!-- 藥品列表區 (點擊展開式手風琴) -->
+<div class="container" id="medListContainer"></div>
+
+<!-- 專屬小浮水印 -->
+<div class="watermark">
+  <span>✨ by 段嘟米🐾</span>
+</div>
+
+<!-- 底部懸浮購物車與暫存區 -->
+<div class="bottom-bar">
+  <button class="bar-btn bar-btn-cart" onclick="openCartModal()">
+    <span>查看待補清單</span>
+    <span class="badge-pill" id="cartBadge">0</span>
+  </button>
+  <button class="bar-btn bar-btn-staging" onclick="openStagingModal()">
+    <span>📦 後方暫存區</span>
+    <span class="badge-pill" id="stagingBadge">0</span>
+  </button>
+</div>
+
+<!-- 1. 待補藥清單 (購物車) Modal -->
+<div class="modal-overlay" id="cartModal">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h2>🛒 你的補藥訂單（待去庫存區拿）</h2>
+      <button class="btn-close" onclick="closeModal('cartModal')">✕</button>
+    </div>
+    <div id="cartListContainer"></div>
+    <div style="margin-top: 18px; display: flex; gap: 10px;">
+      <button class="btn-pill-gray" style="flex:1; padding: 13px;" onclick="copyCartText()">📋 複製純文字清單</button>
+      <button class="btn-pill-black" style="flex:1; padding: 13px;" onclick="confirmClearCart()">清空訂單</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. 後方暫存區 Modal -->
+<div class="modal-overlay" id="stagingModal">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h2>📦 已拿取／待上架）</h2>
+      <button class="btn-close" onclick="closeModal('stagingModal')">✕</button>
+    </div>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+      這裡記錄已經從庫存區拿回來、但還沒空塞進調劑台抽屜的藥品。塞好後請按「已上架」。
+    </p>
+    <div id="stagingListContainer"></div>
+  </div>
+</div>
+
+<!-- 3. 新增 / 編輯藥品 Modal (支援自訂新儲位欄位 + 搜圖) -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h2 id="editModalTitle">＋ 新增藥品資料</h2>
+      <button class="btn-close" onclick="closeModal('editModal')">✕</button>
+    </div>
+    <input type="hidden" id="editMedId">
+    <div class="form-row">
+      <div class="form-group">
+        <label>所屬區域</label>
+        <select id="editZone" onchange="updateEditSlotOptions()">
+          <option value="TOP">上層 (D區)</option>
+          <option value="LEFT">左抽屜</option>
+          <option value="RIGHT">右抽屜</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>儲位代碼</label>
+        <div style="display: flex; gap: 6px;">
+          <select id="editSlot" onchange="handleSlotSelectChange()" style="flex: 1;"></select>
+          <button type="button" class="btn-pill-black" style="padding: 0 11px; border-radius: 10px; white-space: nowrap; font-size: 12px;" onclick="triggerCustomSlot()">＋ 新增儲位</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 手動新增自訂儲位欄位 (點選「＋ 新增儲位」或選單自訂時顯示) -->
+    <div class="form-group" id="customSlotGroup" style="display: none; background: var(--ue-green-light); padding: 12px; border-radius: 10px; border: 1px solid var(--ue-green);">
+      <label style="color: var(--ue-green-dark);">輸入新的儲位代碼 (例如 D-2、D-3 或 d-2-1) *</label>
+      <input type="text" id="editCustomSlot" placeholder="請輸入新儲位代碼（如 D-2、D-3）..." style="background: #FFF;">
+    </div>
+
+    <div class="form-group">
+      <label>系統顯示名 / 常用原廠商品名 *</label>
+      <input type="text" id="editBrand" placeholder="例如：Twynsta 80/5mg">
+    </div>
+    <div class="form-group">
+      <label>院內實際商品名 / 台廠名 / 中文別稱</label>
+      <input type="text" id="editActual" placeholder="例如：Co-midis (樂壓妥) 或 莫鼻卡">
+    </div>
+    <div class="form-group">
+      <label>學名與劑量</label>
+      <input type="text" id="editGeneric" placeholder="例如：Telmisartan 80mg / Amlodipine 5mg">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>點選模式</label>
+        <select id="editMode">
+          <option value="check">單純打勾 (適合散裝/固定量)</option>
+          <option value="count">計算盒數/束數 (＋/－)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>特殊備註標籤 (選填)</label>
+        <input type="text" id="editNote" placeholder="例如：盒裝、勿拆封">
+      </div>
+    </div>
+
+    <!-- 圖片設定區：支援拍照上傳、一鍵 Google 搜圖、圖片網址 -->
+    <!-- 圖片設定區：支援拍照上傳、圖片網址 -->
+    <div class="form-group">
+      <label>藥盒／裸錠對照圖片</label>
+      <div class="img-helper-row">
+        <label class="btn-pill-black" style="margin:0; display:inline-flex; align-items:center; gap:4px; cursor:pointer;">
+          📷 拍照/選相簿
+          <input type="file" id="editImageFile" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+        </label>
+        <button type="button" class="btn-pill-gray" onclick="resetAutoSvg()">🎨 恢復預設藥盒圖</button>
+      </div>
+      <input type="text" id="editImageUrl" placeholder="或直接貼上網路圖片網址 (https://...)" style="margin-top: 8px;" oninput="handleImageUrlInput()">
+      <input type="hidden" id="editImageBase64">
+      <div id="imagePreview" style="margin-top: 10px; max-width: 110px;"></div>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button class="btn-pill-gray" id="btnDeleteMed" style="color: var(--danger); display: none;" onclick="confirmDeleteMed()">刪除藥品</button>
+      <button class="btn-pill-black" style="flex: 1; padding: 13px; background: var(--ue-green); color: #000;" onclick="saveMed()">儲存藥品資料</button>
+    </div>
+  </div>
+</div>
+
+<!-- 4. 備份與匯入 Modal -->
+<div class="modal-overlay" id="backupModal">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h2>資料備份與分享</h2>
+      <button class="btn-close" onclick="closeModal('backupModal')">✕</button>
+    </div>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
+      新增的藥品、自訂儲位與照片都儲存在瀏覽器中。如果要換手機或分享給同事，可以匯出資料代碼。
+    </p>
+    <button class="btn-pill-black" style="width: 100%; padding: 13px; margin-bottom: 14px; background: var(--ue-green); color: #000;" onclick="exportData()">📤 複製全部藥品資料庫代碼</button>
+    <div class="form-group">
+      <label>貼上別人的資料代碼進行匯入（會覆蓋目前列表）</label>
+      <input type="text" id="importInput" placeholder="在此貼上資料代碼...">
+    </div>
+    <button class="btn-pill-gray" style="width: 100%; padding: 11px;" onclick="importData()">📥 確認匯入</button>
+  </div>
+</div>
+
+<!-- 自訂確認視窗 -->
+<div class="confirm-dialog" id="confirmDialog">
+  <div class="confirm-box">
+    <p id="confirmText">確定要執行此操作嗎？</p>
+    <div class="confirm-btns">
+      <button class="btn-pill-gray" onclick="closeConfirm()">取消</button>
+      <button class="btn-pill-black" id="confirmYesBtn" style="background: var(--danger);">確定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 圖片放大檢視 -->
+<div class="img-zoom-overlay" id="imgZoomOverlay" onclick="this.classList.remove('open')">
+  <img id="zoomedImg" src="" alt="藥品大圖">
+</div>
+
+<script>
+  // 基礎儲位定義 (會自動合併使用者手動新增的自訂儲位，如 D-2、D-3)
+  const BASE_ZONES = {
+    TOP: ['D-1-1', 'D-1-2', 'D-1-3', 'D-1-4'],
+    LEFT: ['d-1-1', 'd-1-2', 'd-1-3', 'd-1-4', 'd-1-5'],
+    RIGHT: ['d-1-6', 'd-1-7', 'd-1-8', 'd-1-9', 'd-1-10']
+  };
+
+  // 原廠藥盒配色與劑型資料庫 (依據真實原廠包裝配色與劑型繪製)
+  const BRAND_VISUALS = {
+    'avodart': { box: '#FFD100', stripe: '#003B70', text: '#111111', stripeText: 'gsk 軟膠囊', form: 'softcap', pill1: '#F5EFE6', pill2: '#EAE0D5' },
+    'cataflam': { box: '#FFFFFF', stripe: '#D9272E', text: '#D9272E', stripeText: 'NOVARTIS', form: 'tab', pill1: '#C84B4B', pill2: '#FFFFFF' },
+    'bokey': { box: '#FFFFFF', stripe: '#005BAC', text: '#005BAC', stripeText: '100mg 腸溶', form: 'cap', pill1: '#FFFFFF', pill2: '#4A90E2' },
+    'prednisolone': { box: '#F4F6F8', stripe: '#2E7D32', text: '#1B5E20', stripeText: '5mg 類固醇', form: 'tab', pill1: '#F9A825', pill2: '#FFFFFF' },
+    'strocain': { box: '#FFFFFF', stripe: '#00897B', text: '#00695C', stripeText: '息痛佳音', form: 'tab', pill1: '#FFFFFF', pill2: '#E0F2F1' },
+    'mopride': { box: '#E3F2FD', stripe: '#1565C0', text: '#0D47A1', stripeText: '5mg 腸胃', form: 'tab', pill1: '#FFFFFF', pill2: '#BBDEFB' },
+    'xyzal': { box: '#FFFFFF', stripe: '#0072CE', text: '#004B87', stripeText: 'UCB 驅異樂', form: 'tab', pill1: '#FFFFFF', pill2: '#E1F5FE' },
+    'glucophage': { box: '#FFFFFF', stripe: '#005596', text: '#003366', stripeText: 'MERCK 庫魯化', form: 'tab', pill1: '#FFFFFF', pill2: '#E8EEF5' },
+    'sevikar': { box: '#FFFFFF', stripe: '#00857C', text: '#005A54', stripeText: '第一三共', form: 'tab', pill1: '#F7D1BA', pill2: '#FFFFFF' },
+    'galvus': { box: '#FFF8E1', stripe: '#E65100', text: '#BF360C', stripeText: 'NOVARTIS', form: 'tab', pill1: '#FFE082', pill2: '#FFFFFF' },
+    'lipitor': { box: '#FFFFFF', stripe: '#00509E', text: '#003366', stripeText: 'Pfizer 立普妥', form: 'tab', pill1: '#FFFFFF', pill2: '#E3F2FD' },
+    'harnalidge': { box: '#FFFFFF', stripe: '#D32F2F', text: '#B71C1C', stripeText: 'Astellas 0.2', form: 'tab', pill1: '#FFF9C4', pill2: '#FFFFFF' },
+    'atozet': { box: '#FFFFFF', stripe: '#00838F', text: '#006064', stripeText: 'MSD 理脂', form: 'tab', pill1: '#FFFFFF', pill2: '#E0F7FA' },
+    'augmentin': { box: '#FFFFFF', stripe: '#6A1B9A', text: '#4A148C', stripeText: 'gsk 1g', form: 'tab', pill1: '#FFFFFF', pill2: '#F3E5F5' },
+    'amiodarone': { box: '#FFFFFF', stripe: '#283593', text: '#1A237E', stripeText: 'Sanofi 臟得樂', form: 'tab', pill1: '#FFFFFF', pill2: '#E8EAF6' },
+    'binosto': { box: '#E0F7FA', stripe: '#006064', text: '#004D40', stripeText: '70mg 泡騰錠', form: 'tab', pill1: '#FFFFFF', pill2: '#B2EBF2' },
+    'bena': { box: '#FCE4EC', stripe: '#C2185B', text: '#880E4F', stripeText: '抗組織胺', form: 'cap', pill1: '#F48FB1', pill2: '#FFFFFF' },
+    'clarinase': { box: '#FFFFFF', stripe: '#0277BD', text: '#01579B', stripeText: 'MSD 莫鼻卡', form: 'tab', pill1: '#FFFFFF', pill2: '#E1F5FE' },
+    'coaprovel': { box: '#FFFFFF', stripe: '#EF6C00', text: '#E65100', stripeText: 'Sanofi', form: 'tab', pill1: '#FFCCBC', pill2: '#FFFFFF' },
+    'cravit': { box: '#FFFFFF', stripe: '#C62828', text: '#8E0000', stripeText: '第一三共 500', form: 'tab', pill1: '#FFCDD2', pill2: '#FFFFFF' },
+    'concor': { box: '#FFFFFF', stripe: '#D81B60', text: '#880E4F', stripeText: 'MERCK 1.25', form: 'tab', pill1: '#FFFFFF', pill2: '#FCE4EC' },
+    'keppra': { box: '#FFFDE7', stripe: '#2E7D32', text: '#1B5E20', stripeText: 'UCB 優閒', form: 'tab', pill1: '#FFF59D', pill2: '#FFFFFF' },
+    'dilatrend': { box: '#FFFFFF', stripe: '#00695C', text: '#004D40', stripeText: 'Roche 達利全', form: 'tab', pill1: '#FFE0B2', pill2: '#FFFFFF' },
+    'persantin': { box: '#FFF3E0', stripe: '#E65100', text: '#BF360C', stripeText: 'BI 備鎮心', form: 'tab', pill1: '#FF9800', pill2: '#FFFFFF' },
+    'twynsta': { box: '#FFFFFF', stripe: '#004B87', text: '#002F56', stripeText: 'BI / Co-midis', form: 'tab', pill1: '#90CAF9', pill2: '#FFFFFF' },
+    'regrow': { box: '#FCE4EC', stripe: '#AD1457', text: '#880E4F', stripeText: '利脂寧 5mg', form: 'tab', pill1: '#F8BBD0', pill2: '#FFFFFF' },
+    'sibelium': { box: '#FFFFFF', stripe: '#B71C1C', text: '#212121', stripeText: 'Janssen 黑紅', form: 'cap', pill1: '#212121', pill2: '#D32F2F' },
+    'sigmart': { box: '#FFFFFF', stripe: '#1976D2', text: '#0D47A1', stripeText: '中外製藥 5mg', form: 'tab', pill1: '#FFFFFF', pill2: '#E3F2FD' },
+    'plaquenil': { box: '#FFFFFF', stripe: '#00796B', text: '#004D40', stripeText: 'Sanofi 200', form: 'tab', pill1: '#FFFFFF', pill2: '#E0F2F1' },
+    'xarelto': { box: '#FFFFFF', stripe: '#10384F', text: '#008080', stripeText: 'BAYER 拜瑞妥', form: 'tab', pill1: '#EF9A9A', pill2: '#FFFFFF' },
+    'ufur': { box: '#FFFFFF', stripe: '#1565C0', text: '#0D47A1', stripeText: '大鵬 友復膠囊', form: 'cap', pill1: '#FFFFFF', pill2: '#FFFFFF' },
+    'antrex': { box: '#E8F5E9', stripe: '#388E3C', text: '#1B5E20', stripeText: '芙林雅 15mg', form: 'tab', pill1: '#FFFFFF', pill2: '#C8E6C9' },
+    'fluimucil': { box: '#FFF3E0', stripe: '#F57C00', text: '#E65100', stripeText: 'Zambon 粉包', form: 'powder', pill1: '#FFE0B2', pill2: '#FFFFFF' },
+    'denosin': { box: '#E3F2FD', stripe: '#0288D1', text: '#01579B', stripeText: '治敏樂 5mg', form: 'tab', pill1: '#90CAF9', pill2: '#FFFFFF' },
+    'colchicine': { box: '#F3E5F5', stripe: '#7B1FA2', text: '#4A148C', stripeText: '秋水仙素 0.5', form: 'tab', pill1: '#FFF9C4', pill2: '#FFFFFF' },
+    'caduet': { box: '#FFFFFF', stripe: '#00509E', text: '#003366', stripeText: 'Pfizer 脂脈優', form: 'tab', pill1: '#FFFFFF', pill2: '#BBDEFB' },
+    'dmp': { box: '#E8F5E9', stripe: '#2E7D32', text: '#1B5E20', stripeText: '胃明朗 10mg', form: 'tab', pill1: '#FFFFFF', pill2: '#C8E6C9' },
+    'acc': { box: '#FFF8E1', stripe: '#FF8F00', text: '#E65100', stripeText: '愛克痰 600mg', form: 'tab', pill1: '#FFFFFF', pill2: '#FFECB3' },
+    'lyrica': { box: '#FFFFFF', stripe: '#C62828', text: '#8E0000', stripeText: 'Pfizer 利瑞卡', form: 'cap', pill1: '#FFFFFF', pill2: '#E57373' },
+    'lexapro': { box: '#FFFFFF', stripe: '#2E7D32', text: '#1B5E20', stripeText: 'Lundbeck 離憂', form: 'tab', pill1: '#FFFFFF', pill2: '#C8E6C9' },
+    'minirin': { box: '#FFFFFF', stripe: '#0277BD', text: '#01579B', stripeText: 'Ferring 口溶錠', form: 'tab', pill1: '#FFFFFF', pill2: '#B3E5FC' },
+    'mexitil': { box: '#FFFFFF', stripe: '#00695C', text: '#004D40', stripeText: 'BI 脈律循', form: 'cap', pill1: '#D32F2F', pill2: '#FFCCBC' },
+    'nebilet': { box: '#FFFFFF', stripe: '#1565C0', text: '#0D47A1', stripeText: 'Menarini 耐比洛', form: 'tab', pill1: '#FFFFFF', pill2: '#BBDEFB' },
+    'urso': { box: '#FFFDE7', stripe: '#F9A825', text: '#F57F17', stripeText: '田邊 熊去氧膽酸', form: 'tab', pill1: '#FFFFFF', pill2: '#FFF9C4' },
+    'urinorm': { box: '#E3F2FD', stripe: '#1976D2', text: '#0D47A1', stripeText: '優力康 100mg', form: 'tab', pill1: '#FFFFFF', pill2: '#BBDEFB' },
+    'vytorin': { box: '#FFFFFF', stripe: '#00838F', text: '#006064', stripeText: 'MSD 維妥力', form: 'tab', pill1: '#FFFFFF', pill2: '#B2EBF2' },
+    'visanne': { box: '#FCE4EC', stripe: '#880E4F', text: '#880E4F', stripeText: 'BAYER 異位寧', form: 'tab', pill1: '#FFFFFF', pill2: '#F8BBD0' },
+    'femara': { box: '#FFF8E1', stripe: '#F57F17', text: '#E65100', stripeText: 'NOVARTIS 復乳納', form: 'tab', pill1: '#FFF176', pill2: '#FFFFFF' },
+    'tamoxifen': { box: '#FFFFFF', stripe: '#455A64', text: '#263238', stripeText: '諾瓦得士 10mg', form: 'tab', pill1: '#FFFFFF', pill2: '#CFD8DC' },
+    'gestrin': { box: '#F3E5F5', stripe: '#6A1B9A', text: '#4A148C', stripeText: '佑汝 盒裝', form: 'cap', pill1: '#FFFFFF', pill2: '#E1BEE7' },
+    'yaz': { box: '#FCE4EC', stripe: '#00838F', text: '#AD1457', stripeText: 'BAYER 悅姿', form: 'tab', pill1: '#F48FB1', pill2: '#FFFFFF' },
+    'mtx': { box: '#FFF3E0', stripe: '#D84315', text: '#BF360C', stripeText: '滅殺除癌 2.5', form: 'tab', pill1: '#FFE082', pill2: '#FFFFFF' },
+    'kocel': { box: '#FFF8E1', stripe: '#EF6C00', text: '#E65100', stripeText: 'KCl 補鉀', form: 'tab', pill1: '#FFCC80', pill2: '#FFFFFF' }
+  };
+
+  // 依據原廠藥盒配色與劑型生成高質感擬真對照圖 (包含外盒 + 泡殼藥錠/膠囊)
+  function generateBrandBoxSvg(brand, note, zone) {
+    const key = Object.keys(BRAND_VISUALS).find(k => (brand || '').toLowerCase().includes(k));
+    const defaultPalettes = {
+      TOP: { box: '#FFFFFF', stripe: '#006699', text: '#004466', stripeText: '原廠調劑', form: 'tab', pill1: '#FFFFFF', pill2: '#E1F5FE' },
+      LEFT: { box: '#FFFFFF', stripe: '#06A357', text: '#046C38', stripeText: '左抽屜藥品', form: 'tab', pill1: '#FFFFFF', pill2: '#E8F5E9' },
+      RIGHT: { box: '#FFFFFF', stripe: '#5E35B1', text: '#311B92', stripeText: '右抽屜藥品', form: 'tab', pill1: '#FFFFFF', pill2: '#EDE7F6' }
+    };
+    const v = key ? BRAND_VISUALS[key] : (defaultPalettes[zone] || defaultPalettes.TOP);
+    const title = (brand || 'MED').substring(0, 11);
+    const isCap = v.form === 'cap' || v.form === 'softcap' || (brand + note).toLowerCase().includes('cap') || note.includes('膠囊');
+    const isPowder = v.form === 'powder' || (brand + note).includes('粉');
+
+    let blisterSvg = '';
+    if (isPowder) {
+      // 鋁箔粉包外觀
+      blisterSvg = `
+        <g transform="translate(52, 54) rotate(10)">
+          <rect x="0" y="0" width="54" height="42" rx="4" fill="#FFF8E1" stroke="#FFB300" stroke-width="1.5"/>
+          <line x1="0" y1="9" x2="54" y2="9" stroke="#FFB300" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="27" y="28" font-family="sans-serif" font-size="8" font-weight="800" fill="#E65100" text-anchor="middle">顆粒粉包</text>
+        </g>`;
+    } else if (isCap) {
+      // 泡殼膠囊排裝外觀
+      blisterSvg = `
+        <g transform="translate(46, 56) rotate(12)">
+          <rect x="0" y="0" width="64" height="38" rx="6" fill="#FFFFFF" stroke="#CFD8DC" stroke-width="1.5"/>
+          <g transform="translate(8, 7)">
+            <rect x="0" y="0" width="8" height="8" rx="4" fill="${v.pill1}" stroke="#90A4AE" stroke-width="0.6"/>
+            <rect x="6" y="0" width="8" height="8" rx="4" fill="${v.pill2}" stroke="#90A4AE" stroke-width="0.6"/>
+          </g>
+          <g transform="translate(26, 7)">
+            <rect x="0" y="0" width="8" height="8" rx="4" fill="${v.pill1}" stroke="#90A4AE" stroke-width="0.6"/>
+            <rect x="6" y="0" width="8" height="8" rx="4" fill="${v.pill2}" stroke="#90A4AE" stroke-width="0.6"/>
+          </g>
+          <g transform="translate(44, 7)">
+            <rect x="0" y="0" width="8" height="8" rx="4" fill="${v.pill1}" stroke="#90A4AE" stroke-width="0.6"/>
+            <rect x="6" y="0" width="8" height="8" rx="4" fill="${v.pill2}" stroke="#90A4AE" stroke-width="0.6"/>
+          </g>
+          <g transform="translate(8, 21)">
+            <rect x="0" y="0" width="8" height="8" rx="4" fill="${v.pill1}" stroke="#90A4AE" stroke-width="0.6"/>
+            <rect x="6" y="0" width="8" height="8" rx="4" fill="${v.pill2}" stroke="#90A4AE" stroke-width="0.6"/>
+          </g>
+          <g transform="translate(26, 21)">
+            <rect x="0" y="0" width="8" height="8" rx="4" fill="${v.pill1}" stroke="#90A4AE" stroke-width="0.6"/>
+            <rect x="6" y="0" width="8" height="8" rx="4" fill="${v.pill2}" stroke="#90A4AE" stroke-width="0.6"/>
+          </g>
+        </g>`;
+    } else {
+      // 泡殼圓錠排裝外觀
+      blisterSvg = `
+        <g transform="translate(48, 55) rotate(12)">
+          <rect x="0" y="0" width="60" height="40" rx="6" fill="#FFFFFF" stroke="#CFD8DC" stroke-width="1.5"/>
+          <circle cx="13" cy="12" r="5.5" fill="${v.pill1}" stroke="#90A4AE" stroke-width="1"/>
+          <circle cx="30" cy="12" r="5.5" fill="${v.pill1}" stroke="#90A4AE" stroke-width="1"/>
+          <circle cx="47" cy="12" r="5.5" fill="${v.pill1}" stroke="#90A4AE" stroke-width="1"/>
+          <circle cx="13" cy="28" r="5.5" fill="${v.pill1}" stroke="#90A4AE" stroke-width="1"/>
+          <circle cx="30" cy="28" r="5.5" fill="${v.pill1}" stroke="#90A4AE" stroke-width="1"/>
+          <circle cx="47" cy="28" r="5.5" fill="${v.pill1}" stroke="#90A4AE" stroke-width="1"/>
+        </g>`;
+    }
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+      <rect width="120" height="120" fill="#F4F5F7"/>
+      <!-- 原廠藥盒主體 -->
+      <g transform="translate(10, 14) rotate(-5)">
+        <rect x="0" y="0" width="80" height="46" rx="5" fill="${v.box}" stroke="#D0D7DE" stroke-width="1.2"/>
+        <rect x="0" y="33" width="80" height="13" rx="2" fill="${v.stripe}"/>
+        <text x="8" y="18" font-family="sans-serif" font-size="11.5" font-weight="900" fill="${v.text}">${title}</text>
+        <text x="8" y="29" font-family="sans-serif" font-size="7.5" font-weight="700" fill="#666666">Rx 原廠包裝</text>
+        <text x="8" y="42" font-family="sans-serif" font-size="7" font-weight="800" fill="#FFFFFF">${v.stripeText}</text>
+      </g>
+      ${blisterSvg}
+    </svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
+  // 依據最新樓層設定與照片建立完整資料庫 (上層由下到上為 D-1-2、D-1-3、D-1-4；D-1-1 為檯面無藥物)
+  const DEFAULT_MEDS = [
+    // ==================== 上層 (由下到上：D-1-2、D-1-3、D-1-4) ====================
+    // D-1-2 (下排，由左至右)
+    { id: 'top2_1', zone: 'TOP', slot: 'D-1-2', brand: 'Galvus Met', actual: '高糖優美', generic: 'Vildagliptin / Metformin / 複方降血糖', mode: 'count', note: '盒裝', img: '' },
+    { id: 'top2_2', zone: 'TOP', slot: 'D-1-2', brand: 'Celebrex', actual: '希樂葆', generic: 'Celecoxib 200mg / 消炎止痛・關節炎', mode: 'check', note: '', img: '' },
+    { id: 'top2_3', zone: 'TOP', slot: 'D-1-2', brand: 'Allopurinol', actual: '異嘌呤醇', generic: 'Allopurinol 100mg / 降尿酸・痛風預防', mode: 'check', note: '', img: '' },
+    { id: 'top2_4', zone: 'TOP', slot: 'D-1-2', brand: 'Xyzal', actual: '驅異樂', generic: 'Levocetirizine 5mg / 抗組織胺・過敏鼻炎', mode: 'check', note: '', img: '' },
+    { id: 'top2_5', zone: 'TOP', slot: 'D-1-2', brand: 'Strocain', actual: '息痛佳音', generic: 'Oxethazaine + Polymigel / 胃藥・胃痛胃酸', mode: 'check', note: '', img: '' },
+    { id: 'top2_6', zone: 'TOP', slot: 'D-1-2', brand: '10 Inderal', actual: '心康樂 10mg', generic: 'Propranolol 10mg / 降血壓・心律不整・心悸', mode: 'check', note: '', img: '' },
+    { id: 'top2_7', zone: 'TOP', slot: 'D-1-2', brand: 'Mopride', actual: '摩舒胃清', generic: 'Mosapride 5mg / 促進腸胃蠕動・消化不良', mode: 'count', note: '2 box', img: '' },
+    { id: 'top2_8', zone: 'TOP', slot: 'D-1-2', brand: 'Exforge HCT', actual: '力安穩', generic: 'Amlodipine / Valsartan / HCTZ / 三合一降血壓', mode: 'check', note: '', img: '' },
+    { id: 'top2_9', zone: 'TOP', slot: 'D-1-2', brand: '10 Lipitor', actual: '立普妥 10mg', generic: 'Atorvastatin 10mg / 降血脂・膽固醇', mode: 'check', note: '', img: '' },
+
+    // D-1-3 (中排，由左至右)
+    { id: 'top3_1', zone: 'TOP', slot: 'D-1-3', brand: 'Glucophage', actual: '庫魯化', generic: 'Metformin / 降血糖', mode: 'check', note: '', img: '' },
+    { id: 'top3_2', zone: 'TOP', slot: 'D-1-3', brand: '5 Concor', actual: '康肯 5mg', generic: 'Bisoprolol 5mg / 降血壓・心衰竭・心律', mode: 'check', note: '', img: '' },
+    { id: 'top3_3', zone: 'TOP', slot: 'D-1-3', brand: '400 Trental', actual: '循妥斯 400mg', generic: 'Pentoxifylline 400mg / 末梢血管循環障礙', mode: 'check', note: '', img: '' },
+    { id: 'top3_4', zone: 'TOP', slot: 'D-1-3', brand: 'Cataflam', actual: '克他服寧', generic: 'Diclofenac potassium 25mg / 消炎止痛', mode: 'check', note: '', img: '' },
+    { id: 'top3_5', zone: 'TOP', slot: 'D-1-3', brand: 'Prednisolone', actual: '普力多寧', generic: 'Prednisolone 5mg / 類固醇・抗發炎過敏', mode: 'check', note: '', img: '' },
+    { id: 'top3_6', zone: 'TOP', slot: 'D-1-3', brand: 'Bokey', actual: '伯基', generic: 'Aspirin 100mg / 抗血小板・預防血栓', mode: 'check', note: '', img: '' },
+    { id: 'top3_7', zone: 'TOP', slot: 'D-1-3', brand: '1000 Augmentin', actual: '安滅菌 1g', generic: 'Amoxicillin / Clavulanate / 廣效抗生素', mode: 'count', note: '盒裝', img: '' },
+    { id: 'top3_8', zone: 'TOP', slot: 'D-1-3', brand: 'Norvasc', actual: '脈優 5mg', generic: 'Amlodipine 5mg / 鈣離子阻斷劑・降血壓', mode: 'check', note: '', img: '' },
+    { id: 'top3_9', zone: 'TOP', slot: 'D-1-3', brand: 'Methycobal', actual: '彌可保 500mcg', generic: 'Mecobalamin 500mcg / 活性維生素B12・末梢神經', mode: 'check', note: '', img: '' },
+
+    // D-1-4 (上排，由左至右)
+    { id: 'top4_1', zone: 'TOP', slot: 'D-1-4', brand: 'Crestor', actual: '冠脂妥', generic: 'Rosuvastatin / 降血脂・膽固醇', mode: 'check', note: '', img: '' },
+    { id: 'top4_2', zone: 'TOP', slot: 'D-1-4', brand: 'Zyrtec', actual: '驅特敏', generic: 'Cetirizine 10mg / 抗組織胺・過敏鼻炎', mode: 'check', note: '', img: '' },
+    { id: 'top4_3', zone: 'TOP', slot: 'D-1-4', brand: 'Silymarin', actual: '保肝片', generic: 'Silymarin / 保肝・肝機能改善', mode: 'check', note: '', img: '' },
+    { id: 'top4_4', zone: 'TOP', slot: 'D-1-4', brand: 'Exforge', actual: '易安穩', generic: 'Amlodipine / Valsartan / 複方降血壓', mode: 'check', note: '', img: '' },
+    { id: 'top4_5', zone: 'TOP', slot: 'D-1-4', brand: 'Atozet', actual: '理脂', generic: 'Ezetimibe / Atorvastatin / 複方降血脂', mode: 'check', note: '', img: '' },
+    { id: 'top4_6', zone: 'TOP', slot: 'D-1-4', brand: '0.2 Harnalidge', actual: '活路利淨 0.2mg', generic: 'Tamsulosin 0.2mg / 攝護腺肥大・排尿困難', mode: 'check', note: '', img: '' },
+    { id: 'top4_7', zone: 'TOP', slot: 'D-1-4', brand: 'Diovan', actual: '得安穩', generic: 'Valsartan / 降血壓・心衰竭', mode: 'check', note: '', img: '' },
+    { id: 'top4_8', zone: 'TOP', slot: 'D-1-4', brand: 'Livalo', actual: '力清之 2mg', generic: 'Pitavastatin 2mg / 降血脂・膽固醇', mode: 'check', note: '', img: '' },
+    { id: 'top4_9', zone: 'TOP', slot: 'D-1-4', brand: 'Sevikar', actual: '舒脈康', generic: 'Olmesartan / Amlodipine / 複方降血壓', mode: 'check', note: '', img: '' },
+    { id: 'top4_10', zone: 'TOP', slot: 'D-1-4', brand: 'Soma', actual: '舒肉筋新', generic: 'Carisoprodol / 肌肉鬆弛劑', mode: 'check', note: '', img: '' },
+    { id: 'top4_11', zone: 'TOP', slot: 'D-1-4', brand: '75 Plavix', actual: '保栓通 75mg', generic: 'Clopidogrel 75mg / 抗血小板・預防血栓', mode: 'check', note: '', img: '' },
+    { id: 'top4_12', zone: 'TOP', slot: 'D-1-4', brand: 'Vemlidy', actual: '韋立得 25mg', generic: 'Tenofovir alafenamide 25mg / 慢性B型肝炎', mode: 'check', note: '', img: '' },
+
+    // ==================== 左抽屜 ====================
+    // d-1-1
+    { id: 'd11_1', zone: 'LEFT', slot: 'd-1-1', brand: 'Avodart 0.5mg/cap', actual: '適尿通', generic: 'Dutasteride 0.5mg / 攝護腺肥大', mode: 'check', note: '', img: '' },
+    { id: 'd11_2', zone: 'LEFT', slot: 'd-1-1', brand: '[警]Amiodarone 200mg/tab', actual: '臟得樂', generic: 'Amiodarone 200mg / 心律不整', mode: 'check', note: '警訊藥品', img: '' },
+    { id: 'd11_3', zone: 'LEFT', slot: 'd-1-1', brand: 'Cozaar 50mg/tab', actual: '可悅您 50mg', generic: 'Losartan 50mg / 降血壓・保護腎臟', mode: 'check', note: '', img: '' },
+    { id: 'd11_4', zone: 'LEFT', slot: 'd-1-1', brand: 'Aldactone 25mg/tab', actual: '安達通 25mg', generic: 'Spironolactone 25mg / 保鉀型利尿劑・心衰竭', mode: 'check', note: '', img: '' },
+    { id: 'd11_5', zone: 'LEFT', slot: 'd-1-1', brand: '[發泡]Binosto 70mg/tab', actual: '賓骨泡騰錠', generic: 'Alendronate 70mg / 骨質疏鬆', mode: 'count', note: '70*4', img: '' },
+    { id: 'd11_6', zone: 'LEFT', slot: 'd-1-1', brand: 'Betmiga 50mg/tab', actual: '貝坦利 50mg', generic: 'Mirabegron 50mg / 膀胱過動症・頻尿急尿', mode: 'check', note: '', img: '' },
+    { id: 'd11_7', zone: 'LEFT', slot: 'd-1-1', brand: 'Bena 50mg/cap', actual: '鹽酸二苯胺明', generic: 'Diphenhydramine 50mg / 抗組織胺・止癢過敏', mode: 'check', note: '', img: '' },
+    { id: 'd11_8', zone: 'LEFT', slot: 'd-1-1', brand: 'Clarinase Repetabs 5mg/120mg/tab', actual: '莫鼻卡', generic: 'Loratadine / Pseudoephedrine / 過敏鼻塞', mode: 'check', note: '', img: '' },
+    { id: 'd11_9', zone: 'LEFT', slot: 'd-1-1', brand: 'Coaprovel 300/12.5mg/tab', actual: '可普諾維', generic: 'Irbesartan / HCTZ / 複方降血壓', mode: 'check', note: '', img: '' },
+    { id: 'd11_10', zone: 'LEFT', slot: 'd-1-1', brand: 'Cravit 500mg/tab', actual: '可樂必妥 500mg', generic: 'Levofloxacin 500mg / 喹諾酮類抗生素', mode: 'check', note: '', img: '' },
+    { id: 'd11_11', zone: 'LEFT', slot: 'd-1-1', brand: '(1.25)Concor 1.25mg/tab', actual: '康肯 1.25mg', generic: 'Bisoprolol 1.25mg / 降血壓・心衰竭・心律', mode: 'check', note: '', img: '' },
+
+    // d-1-2
+    { id: 'd12_1', zone: 'LEFT', slot: 'd-1-2', brand: 'Tolizole', actual: '服立治兒', generic: 'Metronidazole / 抗原蟲・厭氧菌感染', mode: 'check', note: '', img: '' },
+    { id: 'd12_2', zone: 'LEFT', slot: 'd-1-2', brand: '(2)Doxaben 2mg/tab', actual: '可迅 2mg', generic: 'Doxazosin 2mg / 降血壓・攝護腺肥大', mode: 'check', note: '', img: '' },
+    { id: 'd12_3', zone: 'LEFT', slot: 'd-1-2', brand: 'Feburic 80mg/tab', actual: '福避痛 80mg', generic: 'Febuxostat 80mg / 降尿酸・痛風', mode: 'check', note: '', img: '' },
+    { id: 'd12_4', zone: 'LEFT', slot: 'd-1-2', brand: '[警]Lixiana 60mg/tab', actual: '里先安 60mg', generic: 'Edoxaban 60mg / 新型口服抗凝血劑', mode: 'check', note: '警訊藥品', img: '' },
+    { id: 'd12_5', zone: 'LEFT', slot: 'd-1-2', brand: '(30)Herbesser 30mg/tab', actual: '合必爽 30mg', generic: 'Diltiazem 30mg / 狹心症・降血壓・心律', mode: 'check', note: '', img: '' },
+    { id: 'd12_6', zone: 'LEFT', slot: 'd-1-2', brand: '(6.25)Dilatrend 6.25mg/tab', actual: '達利全 6.25mg', generic: 'Carvedilol 6.25mg / 降血壓・心衰竭', mode: 'check', note: '', img: '' },
+    { id: 'd12_7', zone: 'LEFT', slot: 'd-1-2', brand: 'Keppra 500mg/tab', actual: '優閒 500mg', generic: 'Levetiracetam 500mg / 抗癲癇', mode: 'check', note: '', img: '' },
+    { id: 'd12_8', zone: 'LEFT', slot: 'd-1-2', brand: "Gina'ex 40mg/tab", actual: '循利寧/銀杏葉', generic: 'Ginkgo biloba 40mg / 末梢血液循環障礙', mode: 'check', note: '', img: '' },
+    { id: 'd12_9', zone: 'LEFT', slot: 'd-1-2', brand: 'Doxycycline 100mg/cap', actual: '四環素膠囊', generic: 'Doxycycline 100mg / 四環素類廣效抗生素', mode: 'check', note: '', img: '' },
+    { id: 'd12_10', zone: 'LEFT', slot: 'd-1-2', brand: 'Ketotifen 1mg/tab', actual: '喘者寧', generic: 'Ketotifen 1mg / 抗過敏・氣喘預防', mode: 'check', note: '', img: '' },
+    { id: 'd12_11', zone: 'LEFT', slot: 'd-1-2', brand: '(0.4)Harnalidge OCAS 0.4mg/tab', actual: '活路利淨 OCAS 0.4mg', generic: 'Tamsulosin 0.4mg / 攝護腺肥大持續性藥效錠', mode: 'check', note: '', img: '' },
+
+    // d-1-3 (依照原本的文字清單建立)
+    { id: 'd13_1', zone: 'LEFT', slot: 'd-1-3', brand: 'Persantin 25', actual: '備鎮心', generic: 'Dipyridamole 25mg / 抗血小板・血管擴張', mode: 'check', note: '', img: '' },
+    { id: 'd13_2', zone: 'LEFT', slot: 'd-1-3', brand: 'Sanyl 50', actual: '', generic: 'Cilostazol 50mg / 抗血小板・間歇性跛行', mode: 'check', note: '', img: '' },
+    { id: 'd13_3', zone: 'LEFT', slot: 'd-1-3', brand: 'Twynsta 5', actual: 'Co-midis (台廠)', generic: 'Telmisartan / Amlodipine 5mg / 複方降血壓', mode: 'check', note: '對照台廠', img: '' },
+    { id: 'd13_4', zone: 'LEFT', slot: 'd-1-3', brand: 'Regrow 5', actual: '利脂寧', generic: 'Rosuvastatin 5mg / 降血脂・膽固醇', mode: 'check', note: '', img: '' },
+    { id: 'd13_5', zone: 'LEFT', slot: 'd-1-3', brand: 'Sibelium 5', actual: '服腦清', generic: 'Flunarizine 5mg / 偏頭痛・眩暈末梢循環', mode: 'check', note: '黑紅膠囊', img: '' },
+    { id: 'd13_6', zone: 'LEFT', slot: 'd-1-3', brand: 'Sigmart', actual: '喜革脈', generic: 'Nicorandil 5mg / 心絞痛・冠狀動脈擴張', mode: 'check', note: '', img: '' },
+    { id: 'd13_7', zone: 'LEFT', slot: 'd-1-3', brand: 'Plaquenil 200', actual: '必賴克廔', generic: 'Hydroxychloroquine 200mg / 免疫調節・風濕狼瘡', mode: 'check', note: '', img: '' },
+    { id: 'd13_8', zone: 'LEFT', slot: 'd-1-3', brand: 'Xarelto 10', actual: '拜瑞妥 10mg', generic: 'Rivaroxaban 10mg / 新型口服抗凝血劑', mode: 'check', note: '', img: '' },
+
+    // d-1-4 (依照原本的文字清單建立)
+    { id: 'd14_1', zone: 'LEFT', slot: 'd-1-4', brand: 'UFUR', actual: '友復膠囊', generic: 'Tegafur / Uracil / 口服抗癌化療藥', mode: 'check', note: '', img: '' },
+    { id: 'd14_2', zone: 'LEFT', slot: 'd-1-4', brand: 'Antrex 15', actual: '芙林雅', generic: 'Ambroxol 15mg / 祛痰・止咳化痰', mode: 'check', note: '', img: '' },
+    { id: 'd14_3', zone: 'LEFT', slot: 'd-1-4', brand: 'Fluimucil 粉', actual: '愛克痰顆粒', generic: 'Acetylcysteine 粉包 / 化痰・減少呼吸道黏液', mode: 'count', note: '粉包', img: '' },
+
+    // ==================== 右抽屜 ====================
+    // d-1-6
+    { id: 'd16_1', zone: 'RIGHT', slot: 'd-1-6', brand: '[發泡]Fluimucil 600mg/tab', actual: '愛克痰發泡錠', generic: 'Acetylcysteine 600mg / 化痰・抗氧化', mode: 'check', note: '發泡錠', img: '' },
+    { id: 'd16_2', zone: 'RIGHT', slot: 'd-1-6', brand: 'Conslife 20mg/2mg/10mg/tab', actual: '康賜爾', generic: 'Sennoside / Dioctyl / Bisacodyl / 軟便緩瀉', mode: 'check', note: '', img: '' },
+    { id: 'd16_3', zone: 'RIGHT', slot: 'd-1-6', brand: 'Caduet 5mg/20mg/tab', actual: '脂脈優 5/20mg', generic: 'Amlodipine 5mg / Atorvastatin 20mg / 降血壓＋降血脂', mode: 'check', note: '', img: '' },
+    { id: 'd16_4', zone: 'RIGHT', slot: 'd-1-6', brand: 'Denosin 5mg/tab', actual: '治敏樂 5mg', generic: 'Desloratadine 5mg / 長效抗組織胺・過敏', mode: 'check', note: '', img: '' },
+    { id: 'd16_5', zone: 'RIGHT', slot: 'd-1-6', brand: '(25)Dilatrend 25mg/tab', actual: '達利全 25mg', generic: 'Carvedilol 25mg / 降血壓・心衰竭', mode: 'check', note: '', img: '' },
+    { id: 'd16_6', zone: 'RIGHT', slot: 'd-1-6', brand: 'Colchicine 0.5mg/tab', actual: '秋水仙素 0.5mg', generic: 'Colchicine 0.5mg / 急性痛風發作', mode: 'check', note: '', img: '' },
+    { id: 'd16_7', zone: 'RIGHT', slot: 'd-1-6', brand: 'Deanxit 0.5mg/10mg/tab', actual: '得安緒', generic: 'Flupentixol / Melitracen / 焦慮・輕度憂鬱', mode: 'check', note: '', img: '' },
+    { id: 'd16_8', zone: 'RIGHT', slot: 'd-1-6', brand: 'D.M.P. 10mg/tab', actual: '胃明朗 10mg', generic: 'Domperidone 10mg / 止吐・促進胃排空', mode: 'check', note: '', img: '' },
+
+    // d-1-7
+    { id: 'd17_1', zone: 'RIGHT', slot: 'd-1-7', brand: 'Lipanthyl Supra 160mg/tab', actual: '弗尼利脂寧 160mg', generic: 'Fenofibrate 160mg / 降三酸甘油酯', mode: 'check', note: '', img: '' },
+    { id: 'd17_2', zone: 'RIGHT', slot: 'd-1-7', brand: 'Lasix 40mg/tab', actual: '來適泄 40mg', generic: 'Furosemide 40mg / 環利尿劑・消水腫降血壓', mode: 'check', note: '', img: '' },
+    { id: 'd17_3', zone: 'RIGHT', slot: 'd-1-7', brand: 'Lexapro 10mg/tab', actual: '離憂 10mg', generic: 'Escitalopram 10mg / 抗憂鬱・焦慮症', mode: 'check', note: '', img: '' },
+    { id: 'd17_4', zone: 'RIGHT', slot: 'd-1-7', brand: 'Lyrica 75mg/cap', actual: '利瑞卡 75mg', generic: 'Pregabalin 75mg / 神經痛・纖維肌痛症', mode: 'check', note: '', img: '' },
+    { id: 'd17_5', zone: 'RIGHT', slot: 'd-1-7', brand: '(20)Lipitor 20mg/tab', actual: '立普妥 20mg', generic: 'Atorvastatin 20mg / 降血脂・膽固醇', mode: 'check', note: '', img: '' },
+    { id: 'd17_6', zone: 'RIGHT', slot: 'd-1-7', brand: 'Minirin MELT 60mcg/tab', actual: '迷你寧口溶錠 60mcg', generic: 'Desmopressin 60mcg / 抗利尿・夜尿症尿崩症', mode: 'check', note: '', img: '' },
+    { id: 'd17_7', zone: 'RIGHT', slot: 'd-1-7', brand: 'Olmetec 20mg/tab', actual: '雅脈 20mg', generic: 'Olmesartan 20mg / 降血壓', mode: 'check', note: '', img: '' },
+    { id: 'd17_8', zone: 'RIGHT', slot: 'd-1-7', brand: 'Mexitil 100mg/cap', actual: '脈律循膠囊 100mg', generic: 'Mexiletine 100mg / 心室性心律不整', mode: 'check', note: '', img: '' },
+    { id: 'd17_9', zone: 'RIGHT', slot: 'd-1-7', brand: 'N.T.G. 0.6mg/tab', actual: '耐絞寧舌下錠', generic: 'Nitroglycerin 0.6mg / 急性心絞痛急救', mode: 'check', note: '舌下錠', img: '' },
+    { id: 'd17_10', zone: 'RIGHT', slot: 'd-1-7', brand: 'Nebilet 5mg/tab', actual: '耐比洛 5mg', generic: 'Nebivolol 5mg / 選擇性β阻斷劑・降血壓', mode: 'check', note: '', img: '' },
+
+    // d-1-8
+    { id: 'd18_1', zone: 'RIGHT', slot: 'd-1-8', brand: '(200)Xanthium 200mg/tab', actual: '善呼吸 200mg', generic: 'Theophylline 200mg / 支氣管擴張・氣喘', mode: 'check', note: '', img: '' },
+    { id: 'd18_2', zone: 'RIGHT', slot: 'd-1-8', brand: 'Zulitor 4mg/tab', actual: '脂妥力 4mg', generic: 'Pitavastatin 4mg / 降血脂・膽固醇', mode: 'check', note: '', img: '' },
+    { id: 'd18_3', zone: 'RIGHT', slot: 'd-1-8', brand: '[警](15)Xarelto 15mg/tab', actual: '拜瑞妥 15mg', generic: 'Rivaroxaban 15mg / 新型口服抗凝血劑', mode: 'check', note: '警訊藥品', img: '' },
+    { id: 'd18_4', zone: 'RIGHT', slot: 'd-1-8', brand: 'Voltaren Retard 75mg/tab', actual: '服他寧長效錠 75mg', generic: 'Diclofenac 75mg / 長效消炎止痛', mode: 'check', note: '', img: '' },
+    { id: 'd18_5', zone: 'RIGHT', slot: 'd-1-8', brand: 'Urecholine 25mg/tab', actual: '舒解 25mg', generic: 'Bethanechol 25mg / 促進膀胱收縮・排尿困難', mode: 'check', note: '', img: '' },
+    { id: 'd18_6', zone: 'RIGHT', slot: 'd-1-8', brand: 'URSO 100mg/tab', actual: '熊去氧膽酸 100mg', generic: 'Ursodeoxycholic acid 100mg / 利膽・膽結石保肝', mode: 'check', note: '', img: '' },
+    { id: 'd18_7', zone: 'RIGHT', slot: 'd-1-8', brand: 'YOU-JET 50mg/tab', actual: '憂解 50mg', generic: 'Sertraline 50mg / 抗憂鬱・焦慮強迫症', mode: 'check', note: '', img: '' },
+    { id: 'd18_8', zone: 'RIGHT', slot: 'd-1-8', brand: 'Vytorin 10mg/20mg/tab', actual: '維妥力 10/20mg', generic: 'Ezetimibe 10mg / Simvastatin 20mg / 複方降血脂', mode: 'check', note: '', img: '' },
+    { id: 'd18_9', zone: 'RIGHT', slot: 'd-1-8', brand: 'Rocaltrol (Vit-D3) 0.25mcg/cap', actual: '羅可骨醇 0.25mcg', generic: 'Calcitriol 0.25mcg / 活性維生素D3・低血鈣骨鬆', mode: 'check', note: '', img: '' },
+    { id: 'd18_10', zone: 'RIGHT', slot: 'd-1-8', brand: 'Urief 8mg/tab', actual: '優列扶 8mg', generic: 'Silodosin 8mg / 攝護腺肥大・改善排尿', mode: 'check', note: '', img: '' },
+    { id: 'd18_11', zone: 'RIGHT', slot: 'd-1-8', brand: 'Urinorm 100mg/tab', actual: '優力康 100mg', generic: 'Benzbromarone 100mg / 促進尿酸排泄・痛風', mode: 'check', note: '', img: '' },
+
+    // d-1-9 (依最新電子標籤照片，由上到下、由左至右)
+    { id: 'd19_1', zone: 'RIGHT', slot: 'd-1-9', brand: '[警]Methotrexate 2.5mg/tab', actual: '滅殺除癌 2.5mg', generic: 'Methotrexate 2.5mg / 免疫抑制・類風濕關節炎', mode: 'check', note: '警訊藥品', img: '' },
+    { id: 'd19_2', zone: 'RIGHT', slot: 'd-1-9', brand: 'Imuran 50mg/tab', actual: '移護寧 50mg', generic: 'Azathioprine 50mg / 免疫抑制劑', mode: 'check', note: '', img: '' },
+    { id: 'd19_3', zone: 'RIGHT', slot: 'd-1-9', brand: '[警]Casodex 50mg/tab', actual: '可蘇多 50mg', generic: 'Bicalutamide 50mg / 攝護腺癌抗雄性素', mode: 'check', note: '警訊藥品', img: '' },
+    { id: 'd19_4', zone: 'RIGHT', slot: 'd-1-9', brand: 'Evista 60mg/tab', actual: '鈣穩 60mg', generic: 'Raloxifene 60mg / 停經後骨質疏鬆', mode: 'check', note: '', img: '' },
+    { id: 'd19_5', zone: 'RIGHT', slot: 'd-1-9', brand: 'Visanne 2mg/tab', actual: '異位寧 2mg', generic: 'Dienogest 2mg / 子宮內膜異位症', mode: 'check', note: '', img: '' },
+    { id: 'd19_6', zone: 'RIGHT', slot: 'd-1-9', brand: '[警]Femara 2.5mg/tab', actual: '復乳納 2.5mg', generic: 'Letrozole 2.5mg / 乳癌荷爾蒙治療', mode: 'check', note: '警訊藥品', img: '' },
+    { id: 'd19_7', zone: 'RIGHT', slot: 'd-1-9', brand: 'Rowapraxin 10mg/tab', actual: '樂必寧 10mg', generic: 'Pipoxolan 10mg / 胃腸道・泌尿道平滑肌解痙', mode: 'check', note: '', img: '' },
+    { id: 'd19_8', zone: 'RIGHT', slot: 'd-1-9', brand: '[警]Tamoxifen 10mg/tab', actual: '諾瓦得士 10mg', generic: 'Tamoxifen 10mg / 乳癌荷爾蒙治療', mode: 'check', note: '警訊藥品', img: '' },
+    { id: 'd19_9', zone: 'RIGHT', slot: 'd-1-9', brand: 'Gestrin 2.5mg/cap', actual: '佑汝 2.5mg', generic: 'Gestrinone 2.5mg / 子宮內膜異位症', mode: 'count', note: '佑汝盒裝', img: '' },
+    { id: 'd19_10', zone: 'RIGHT', slot: 'd-1-9', brand: '[臨]YAZ 3mg/0.02mg/tab', actual: '悅姿', generic: 'Drospirenone / Ethinyl estradiol / 口服避孕・調經', mode: 'count', note: '盒裝', img: '' },
+    { id: 'd19_11', zone: 'RIGHT', slot: 'd-1-9', brand: 'Covina 2mg', actual: '康復娜 2mg', generic: 'Estradiol valerate 2mg / 雌激素補充', mode: 'check', note: '', img: '' },
+    { id: 'd19_12', zone: 'RIGHT', slot: 'd-1-9', brand: 'Progynova 2mg', actual: '益斯得 2mg', generic: 'Estradiol valerate 2mg / 更年期雌激素補充', mode: 'check', note: '', img: '' },
+    { id: 'd19_13', zone: 'RIGHT', slot: 'd-1-9', brand: 'Utrogestan 100mg', actual: '優潔通 100mg', generic: 'Progesterone 100mg / 天然黃體素・安胎調經', mode: 'check', note: '', img: '' },
+
+    // d-1-10 (依最新電子標籤照片，由上到下、由左至右)
+    { id: 'd110_1', zone: 'RIGHT', slot: 'd-1-10', brand: '(500)Depakine Chrono 500mg/tab', actual: '帝拔癲持續性藥效膜衣錠', generic: 'Valproic acid 500mg / 抗癲癇・情緒穩定', mode: 'check', note: '', img: '' },
+    { id: 'd110_2', zone: 'RIGHT', slot: 'd-1-10', brand: 'Kocel', actual: '康鉀 / 氯化鉀', generic: 'Potassium chloride / 補充鉀離子・低血鉀', mode: 'check', note: '', img: '' }
+  ];
+
+  // 狀態變數 (升級為 v6 載入最新修正資料庫)
+  let meds = DEFAULT_MEDS;
+  let customZones = { TOP: [], LEFT: [], RIGHT: [] };
+  let cart = {};
+  let staging = {};
+  let expandedSlots = new Set(['D-1-2', 'd-1-1']);
+  let sortingSlots = new Set(); // 記錄目前開啟「拖曳排序模式」的儲位
+
+  try {
+    const savedMeds = localStorage.getItem('medeats_meds_v6');
+    if (savedMeds) meds = JSON.parse(savedMeds);
+    const savedCustomZones = localStorage.getItem('medeats_zones_v6');
+    if (savedCustomZones) customZones = JSON.parse(savedCustomZones);
+    const savedCart = localStorage.getItem('medeats_cart_v6');
+    if (savedCart) cart = JSON.parse(savedCart);
+    const savedStaging = localStorage.getItem('medeats_staging_v6');
+    if (savedStaging) staging = JSON.parse(savedStaging);
+  } catch (e) {
+    console.warn('LocalStorage 讀取受限，使用記憶體模式');
+  }
+
+  let currentZone = 'ALL';
+
+  function saveState() {
+    try {
+      localStorage.setItem('medeats_meds_v6', JSON.stringify(meds));
+      localStorage.setItem('medeats_zones_v6', JSON.stringify(customZones));
+      localStorage.setItem('medeats_cart_v6', JSON.stringify(cart));
+      localStorage.setItem('medeats_staging_v6', JSON.stringify(staging));
+    } catch (e) {
+      console.warn('LocalStorage 寫入受限');
+    }
+    updateBadges();
+  }
+
+  // 動態取得該區域所有儲位 (包含預設 + 使用者自訂的新儲位)
+  function getSlotsForZone(zone) {
+    const set = new Set([...(BASE_ZONES[zone] || []), ...(customZones[zone] || [])]);
+    meds.forEach(m => {
+      if (m.zone === zone && m.slot) set.add(m.slot);
+    });
+    return Array.from(set);
+  }
+
+  // 自訂 Toast 提示
+  let toastTimer;
+  function showToast(msg) {
+    const el = document.getElementById('toastMsg');
+    el.innerText = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      el.classList.remove('show');
+    }, 2500);
+  }
+
+  // 自訂確認框
+  function showConfirm(msg, onConfirm) {
+    document.getElementById('confirmText').innerText = msg;
+    const yesBtn = document.getElementById('confirmYesBtn');
+    yesBtn.onclick = () => {
+      closeConfirm();
+      onConfirm();
+    };
+    document.getElementById('confirmDialog').classList.add('open');
+  }
+
+  function closeConfirm() {
+    document.getElementById('confirmDialog').classList.remove('open');
+  }
+
+  function updateBadges() {
+    const cartCount = Object.keys(cart).length;
+    const stagingCount = Object.keys(staging).length;
+    document.getElementById('cartBadge').innerText = cartCount;
+    document.getElementById('stagingBadge').innerText = stagingCount;
+  }
+
+  function selectZone(zone) {
+    currentZone = zone;
+    document.querySelectorAll('.zone-tab').forEach(el => {
+      el.classList.toggle('active', el.dataset.zone === zone);
+    });
+    renderMedList();
+  }
+
+  function toggleSlotAccordion(slot) {
+    if (expandedSlots.has(slot)) {
+      expandedSlots.delete(slot);
+    } else {
+      expandedSlots.add(slot);
+    }
+    renderMedList();
+  }
+
+  function toggleAllSlots() {
+    const allSlots = new Set(meds.map(m => m.slot));
+    if (expandedSlots.size > 0) {
+      expandedSlots.clear();
+    } else {
+      expandedSlots = allSlots;
+    }
+    renderMedList();
+  }
+
+  // 切換單一儲位的「拖曳排序模式」
+  function toggleSlotSortMode(slot) {
+    if (sortingSlots.has(slot)) {
+      sortingSlots.delete(slot);
+      showToast(`已儲存 ${slot} 藥品順序`);
+    } else {
+      sortingSlots.add(slot);
+      expandedSlots.add(slot);
+      showToast(`已開啟 ${slot} 拖曳排序模式`);
+    }
+    renderMedList();
+  }
+
+  // 在同一個儲位內重新排列藥品順序並儲存
+  function reorderMedInSlot(slot, fromMedId, toMedId) {
+    if (!fromMedId || !toMedId || fromMedId === toMedId) return;
+    const slotIndices = [];
+    const slotItems = [];
+    meds.forEach((m, idx) => {
+      if (m.slot === slot) {
+        slotIndices.push(idx);
+        slotItems.push(m);
+      }
+    });
+
+    const fromPos = slotItems.findIndex(m => m.id === fromMedId);
+    const toPos = slotItems.findIndex(m => m.id === toMedId);
+    if (fromPos === -1 || toPos === -1) return;
+
+    const [movedItem] = slotItems.splice(fromPos, 1);
+    slotItems.splice(toPos, 0, movedItem);
+
+    slotIndices.forEach((origIdx, i) => {
+      meds[origIdx] = slotItems[i];
+    });
+
+    saveState();
+    renderMedList();
+  }
+
+  // 點擊 ▲ / ▼ 微調順序 (手機單手操作超方便)
+  function moveMedStep(slot, medId, direction) {
+    const slotItems = meds.filter(m => m.slot === slot);
+    const pos = slotItems.findIndex(m => m.id === medId);
+    const targetPos = pos + direction;
+    if (targetPos < 0 || targetPos >= slotItems.length) return;
+    reorderMedInSlot(slot, medId, slotItems[targetPos].id);
+  }
+
+  function renderMedList() {
+    const container = document.getElementById('medListContainer');
+    const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+    container.innerHTML = '';
+
+    // 過濾藥品
+    const filtered = meds.filter(m => {
+      if (currentZone !== 'ALL' && m.zone !== currentZone) return false;
+      if (keyword) {
+        const text = `${m.brand} ${m.actual} ${m.generic} ${m.note} ${m.slot}`.toLowerCase();
+        return text.includes(keyword);
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding: 48px 0; color: var(--text-secondary); font-weight:600;">找不到符合的藥品，點右上角「＋ 新增藥品」即可建立喔！</div>`;
+      return;
+    }
+
+    // 依儲位分組顯示
+    const grouped = {};
+    filtered.forEach(m => {
+      if (!grouped[m.slot]) grouped[m.slot] = [];
+      grouped[m.slot].push(m);
+    });
+
+    Object.keys(grouped).forEach(slot => {
+      const items = grouped[slot];
+      // 若有搜尋關鍵字，自動展開符合的格位
+      const isOpen = keyword.length > 0 || expandedSlots.has(slot);
+      const selectedInSlot = items.filter(m => (cart[m.id] || 0) > 0).length;
+
+      const groupEl = document.createElement('div');
+      groupEl.className = 'accordion-group' + (isOpen ? ' open' : '');
+
+      const headerEl = document.createElement('div');
+      headerEl.className = 'accordion-header';
+      headerEl.onclick = () => toggleSlotAccordion(slot);
+      headerEl.innerHTML = `
+        <div class="accordion-title-wrap">
+          <span class="slot-badge-lg">${slot}</span>
+          <span class="slot-count-text">共 ${items.length} 項</span>
+          ${selectedInSlot > 0 ? `<span class="slot-selected-pill">已選 ${selectedInSlot}</span>` : ''}
+        </div>
+        <span class="accordion-arrow">▼</span>
+      `;
+      groupEl.appendChild(headerEl);
+
+      const bodyEl = document.createElement('div');
+      bodyEl.className = 'accordion-body';
+      const isSorting = sortingSlots.has(slot) && keyword.length === 0;
+
+      // 儲位內頂部控制列：提供「⇅ 調整順序」點擊鍵位
+      if (keyword.length === 0 && items.length > 1) {
+        const sortBar = document.createElement('div');
+        sortBar.className = 'slot-sort-bar';
+        sortBar.innerHTML = `
+          <span class="slot-sort-hint">${isSorting ? '上下拖曳藥品卡片或按箭頭調整順序' : '依照抽屜實際擺放順序排列'}</span>
+          <button type="button" class="btn-sort-toggle ${isSorting ? 'active' : ''}" onclick="toggleSlotSortMode('${slot}')">
+            ${isSorting ? '✓ 完成排序' : '⇅ 調整順序'}
+          </button>
+        `;
+        bodyEl.appendChild(sortBar);
+      }
+
+      let draggedMedId = null;
+
+      items.forEach(m => {
+        const inCartQty = cart[m.id] || 0;
+        const displayImg = m.img || generateBrandBoxSvg(m.brand, m.note, m.zone);
+
+        const card = document.createElement('div');
+        card.className = 'med-card' + (isSorting ? ' sortable-mode' : '') + (!isSorting && inCartQty > 0 ? ' selected' : '');
+        card.dataset.medId = m.id;
+
+        if (!isSorting) {
+          card.onclick = () => {
+            if (m.mode === 'count') {
+              if (inCartQty === 0) {
+                updateCartQty(m.id, 1);
+                showToast('已加入待補清單，可調整盒/束數');
+              }
+            } else {
+              toggleCartCheck(m.id);
+            }
+          };
+        }
+
+        if (isSorting) {
+          card.draggable = true;
+
+          // 桌機滑鼠拖曳事件
+          card.addEventListener('dragstart', (e) => {
+            draggedMedId = m.id;
+            card.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+          });
+          card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            draggedMedId = null;
+          });
+          card.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+          });
+          card.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (draggedMedId && draggedMedId !== m.id) {
+              reorderMedInSlot(slot, draggedMedId, m.id);
+            }
+          });
+
+          // 手機觸控手指直接拖曳事件
+          card.addEventListener('touchstart', (e) => {
+            if (e.target.tagName === 'BUTTON') return;
+            draggedMedId = m.id;
+            card.classList.add('dragging');
+          }, { passive: true });
+
+          card.addEventListener('touchmove', (e) => {
+            if (!draggedMedId) return;
+            const touch = e.touches[0];
+            const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+            const targetCard = targetEl ? targetEl.closest('.med-card.sortable-mode') : null;
+            if (targetCard && targetCard.dataset.medId && targetCard.dataset.medId !== draggedMedId) {
+              const targetId = targetCard.dataset.medId;
+              reorderMedInSlot(slot, draggedMedId, targetId);
+            }
+          }, { passive: true });
+
+          card.addEventListener('touchend', () => {
+            card.classList.remove('dragging');
+            draggedMedId = null;
+          });
+        }
+
+        const floatingControlHtml = m.mode === 'count'
+          ? (inCartQty > 0
+              ? `<div class="ue-stepper" onclick="event.stopPropagation()">
+                   <button onclick="event.stopPropagation(); updateCartQty('${m.id}', -1)">－</button>
+                   <span>${inCartQty}</span>
+                   <button onclick="event.stopPropagation(); updateCartQty('${m.id}', 1)">＋</button>
+                 </div>`
+              : `<button class="ue-add-btn" onclick="event.stopPropagation(); updateCartQty('${m.id}', 1); showToast('已加入待補清單，可調整盒/束數')">＋</button>`)
+          : `<button class="ue-add-btn ${inCartQty > 0 ? 'checked' : ''}" onclick="event.stopPropagation(); toggleCartCheck('${m.id}')">
+               ${inCartQty > 0 ? '✓' : '＋'}
+             </button>`;
+
+        const dragHandleHtml = isSorting
+          ? `<div class="drag-handle-box">
+               <div class="drag-grip" title="按住拖曳">☰</div>
+               <div class="sort-arrow-btns">
+                 <button type="button" onclick="moveMedStep('${slot}', '${m.id}', -1)" title="往上移">▲</button>
+                 <button type="button" onclick="moveMedStep('${slot}', '${m.id}', 1)" title="往下移">▼</button>
+               </div>
+             </div>`
+          : '';
+
+        card.innerHTML = `
+          ${dragHandleHtml}
+          <div class="med-info">
+            <div class="med-brand">
+              <span>${m.brand}</span>
+              ${m.note ? `<span class="tag-note">${m.note}</span>` : ''}
+            </div>
+            ${m.actual ? `<div class="med-actual">院內/別稱：${m.actual}</div>` : ''}
+            <div class="med-generic">${m.generic || '尚未填寫學名'}</div>
+            ${!isSorting ? `<button class="btn-edit-mini" onclick="event.stopPropagation(); openEditModal('${m.id}')">編輯 / 換圖</button>` : ''}
+          </div>
+          <div class="med-visual-wrap">
+            <div class="med-img-box" onclick="event.stopPropagation(); ${isSorting ? '' : `zoomImage('${displayImg}')`}">
+              <img src="${displayImg}" alt="${m.brand}">
+            </div>
+            ${!isSorting ? floatingControlHtml : ''}
+          </div>
+        `;
+        bodyEl.appendChild(card);
+      });
+
+      groupEl.appendChild(bodyEl);
+      container.appendChild(groupEl);
+    });
+  }
+
+  function updateCartQty(id, delta) {
+    const current = cart[id] || 0;
+    const next = current + delta;
+    if (next <= 0) {
+      delete cart[id];
+    } else {
+      cart[id] = next;
+    }
+    saveState();
+    renderMedList();
+  }
+
+  function toggleCartCheck(id) {
+    if (cart[id]) {
+      delete cart[id];
+    } else {
+      cart[id] = 1;
+      showToast('已加入補藥訂單');
+    }
+    saveState();
+    renderMedList();
+  }
+
+  // 開啟購物車清單
+  function openCartModal() {
+    const container = document.getElementById('cartListContainer');
+    container.innerHTML = '';
+    const ids = Object.keys(cart);
+
+    if (ids.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding: 30px 0; color: var(--text-secondary); font-weight:600;">目前沒有待補的藥品，快去選購吧！</div>`;
+    } else {
+      ids.sort((a, b) => {
+        const medA = meds.find(m => m.id === a);
+        const medB = meds.find(m => m.id === b);
+        return (medA?.slot || '').localeCompare(medB?.slot || '');
+      });
+
+      ids.forEach(id => {
+        const m = meds.find(item => item.id === id);
+        if (!m) return;
+        const qtyText = m.mode === 'count' ? ` × ${cart[id]} 盒/束` : ' (需補)';
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `
+          <div class="list-item-info">
+            <div class="list-item-title">[${m.slot}] ${m.brand} <span style="color:var(--ue-green-dark);">${qtyText}</span></div>
+            <div class="list-item-sub">${m.actual ? m.actual + ' | ' : ''}${m.generic}</div>
+          </div>
+          <button class="btn-move-staging" onclick="moveToStaging('${id}')">已拿取(放後方) ➔</button>
+        `;
+        container.appendChild(item);
+      });
+    }
+    document.getElementById('cartModal').classList.add('open');
+  }
+
+  // 移至後方暫存區
+  function moveToStaging(id) {
+    staging[id] = cart[id];
+    delete cart[id];
+    saveState();
+    renderMedList();
+    openCartModal();
+    showToast('已移至後方暫存區');
+  }
+
+  // 開啟後方暫存區
+  function openStagingModal() {
+    const container = document.getElementById('stagingListContainer');
+    container.innerHTML = '';
+    const ids = Object.keys(staging);
+
+    if (ids.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding: 30px 0; color: var(--text-secondary); font-weight:600;">太棒了！後方沒有堆積未補上的藥品。</div>`;
+    } else {
+      ids.forEach(id => {
+        const m = meds.find(item => item.id === id);
+        if (!m) return;
+        const qtyText = m.mode === 'count' ? ` × ${staging[id]} 盒/束` : '';
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `
+          <div class="list-item-info">
+            <div class="list-item-title">歸位至 ➔ <span style="color:var(--warning);">${m.slot}</span> | ${m.brand}${qtyText}</div>
+            <div class="list-item-sub">${m.actual ? m.actual + ' | ' : ''}${m.generic}</div>
+          </div>
+          <button class="btn-done-staging" onclick="completeStaging('${id}')">✓ 已上架完成</button>
+        `;
+        container.appendChild(item);
+      });
+    }
+    document.getElementById('stagingModal').classList.add('open');
+  }
+
+  function completeStaging(id) {
+    delete staging[id];
+    saveState();
+    openStagingModal();
+    showToast('已歸位完成！');
+  }
+
+  // 剪貼簿複製方法
+  function fallbackCopyText(text, successMsg) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      showToast(successMsg);
+    } catch (err) {
+      showToast('複製失敗，請手動選取複製');
+    }
+    document.body.removeChild(textArea);
+  }
+
+  function copyCartText() {
+    const ids = Object.keys(cart);
+    if (ids.length === 0) return showToast('清單是空的喔！');
+    
+    let text = '【MedEats 調劑台補藥清單】\n';
+    ids.forEach(id => {
+      const m = meds.find(item => item.id === id);
+      if (!m) return;
+      const qty = m.mode === 'count' ? ` (${cart[id]}盒/束)` : '';
+      const actual = m.actual ? ` [${m.actual}]` : '';
+      text += `□ ${m.slot}｜${m.brand}${actual}${qty}\n`;
+    });
+    text += '\n— by 段嘟米';
+
+    fallbackCopyText(text, '已複製補藥清單！可直接貼到 Line 備忘錄');
+  }
+
+  function confirmClearCart() {
+    if (Object.keys(cart).length === 0) return;
+    showConfirm('確定要清空目前的待補藥清單嗎？', () => {
+      cart = {};
+      saveState();
+      renderMedList();
+      closeModal('cartModal');
+      showToast('購物車已清空');
+    });
+  }
+
+  // 更新儲位下拉選單 (包含「➕ 自訂新儲位」選項)
+  function updateEditSlotOptions(selectedSlot = '') {
+    const zone = document.getElementById('editZone').value;
+    const slotSelect = document.getElementById('editSlot');
+    const slots = getSlotsForZone(zone);
+    slotSelect.innerHTML = '';
+
+    slots.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.innerText = s;
+      if (s === selectedSlot) opt.selected = true;
+      slotSelect.appendChild(opt);
+    });
+
+    const customOpt = document.createElement('option');
+    customOpt.value = '__CUSTOM__';
+    customOpt.innerText = '➕ 自訂新儲位代碼...';
+    slotSelect.appendChild(customOpt);
+
+    handleSlotSelectChange();
+  }
+
+  function handleSlotSelectChange() {
+    const val = document.getElementById('editSlot').value;
+    const customGroup = document.getElementById('customSlotGroup');
+    if (val === '__CUSTOM__') {
+      customGroup.style.display = 'block';
+      document.getElementById('editCustomSlot').focus();
+    } else {
+      customGroup.style.display = 'none';
+    }
+  }
+
+  // 點擊「＋ 新增儲位」快捷按鈕直接展開輸入框
+  function triggerCustomSlot() {
+    const slotSelect = document.getElementById('editSlot');
+    slotSelect.value = '__CUSTOM__';
+    handleSlotSelectChange();
+  }
+
+  function openEditModal(id = null) {
+    const title = document.getElementById('editModalTitle');
+    const btnDel = document.getElementById('btnDeleteMed');
+    document.getElementById('editImageFile').value = '';
+    document.getElementById('editCustomSlot').value = '';
+
+    if (id) {
+      const m = meds.find(item => item.id === id);
+      title.innerText = '編輯藥品資料';
+      document.getElementById('editMedId').value = m.id;
+      document.getElementById('editZone').value = m.zone;
+      updateEditSlotOptions(m.slot);
+      document.getElementById('editBrand').value = m.brand;
+      document.getElementById('editActual').value = m.actual || '';
+      document.getElementById('editGeneric').value = m.generic || '';
+      document.getElementById('editMode').value = m.mode || 'check';
+      document.getElementById('editNote').value = m.note || '';
+      document.getElementById('editImageBase64').value = m.img || '';
+      document.getElementById('editImageUrl').value = (m.img && m.img.startsWith('http')) ? m.img : '';
+      const previewSrc = m.img || generateBrandBoxSvg(m.brand, m.note, m.zone);
+      document.getElementById('imagePreview').innerHTML = `<img src="${previewSrc}" style="width:100%; border-radius:10px; border:1px solid #DDD;">`;
+      btnDel.style.display = 'block';
+    } else {
+      title.innerText = '＋ 新增藥品資料';
+      document.getElementById('editMedId').value = '';
+      document.getElementById('editZone').value = currentZone !== 'ALL' ? currentZone : 'TOP';
+      updateEditSlotOptions();
+      document.getElementById('editBrand').value = '';
+      document.getElementById('editActual').value = '';
+      document.getElementById('editGeneric').value = '';
+      document.getElementById('editMode').value = 'check';
+      document.getElementById('editNote').value = '';
+      document.getElementById('editImageBase64').value = '';
+      document.getElementById('editImageUrl').value = '';
+      document.getElementById('imagePreview').innerHTML = '';
+      btnDel.style.display = 'none';
+    }
+    document.getElementById('editModal').classList.add('open');
+  }
+
+  function handleImageUrlInput() {
+    const url = document.getElementById('editImageUrl').value.trim();
+    if (url.startsWith('http')) {
+      document.getElementById('editImageBase64').value = url;
+      document.getElementById('imagePreview').innerHTML = `<img src="${url}" style="width:100%; border-radius:10px; border:1px solid #DDD;" onerror="this.style.display='none'">`;
+    }
+  }
+
+  function resetAutoSvg() {
+    document.getElementById('editImageBase64').value = '';
+    document.getElementById('editImageUrl').value = '';
+    const brand = document.getElementById('editBrand').value.trim() || 'MED';
+    const note = document.getElementById('editNote').value.trim();
+    const zone = document.getElementById('editZone').value;
+    const svg = generateBrandBoxSvg(brand, note, zone);
+    document.getElementById('imagePreview').innerHTML = `<img src="${svg}" style="width:100%; border-radius:10px; border:1px solid #DDD;">`;
+    showToast('已恢復為原廠擬真藥盒圖');
+  }
+
+  // 壓縮並轉存圖片為 Base64
+  function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 300;
+        const scale = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+        document.getElementById('editImageBase64').value = compressedBase64;
+        document.getElementById('editImageUrl').value = '';
+        document.getElementById('imagePreview').innerHTML = `<img src="${compressedBase64}" style="width:100%; border-radius:10px; border:1px solid #DDD;">`;
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function saveMed() {
+    const id = document.getElementById('editMedId').value;
+    const brand = document.getElementById('editBrand').value.trim();
+    if (!brand) return showToast('請至少填寫藥品名稱喔！');
+
+    const zone = document.getElementById('editZone').value;
+    let finalSlot = document.getElementById('editSlot').value;
+    if (finalSlot === '__CUSTOM__') {
+      finalSlot = document.getElementById('editCustomSlot').value.trim();
+      if (!finalSlot) return showToast('請輸入自訂的新儲位代碼（如 D-2、D-3）！');
+      if (!customZones[zone]) customZones[zone] = [];
+      if (!customZones[zone].includes(finalSlot)) {
+        customZones[zone].push(finalSlot);
+      }
+    }
+
+    const medData = {
+      id: id || 'm_' + Date.now(),
+      zone: zone,
+      slot: finalSlot,
+      brand: brand,
+      actual: document.getElementById('editActual').value.trim(),
+      generic: document.getElementById('editGeneric').value.trim(),
+      mode: document.getElementById('editMode').value,
+      note: document.getElementById('editNote').value.trim(),
+      img: document.getElementById('editImageBase64').value
+    };
+
+    if (id) {
+      const idx = meds.findIndex(m => m.id === id);
+      if (idx !== -1) meds[idx] = medData;
+      showToast('藥品資料已更新');
+    } else {
+      meds.push(medData);
+      showToast(`已新增至儲位 ${finalSlot}`);
+    }
+
+    expandedSlots.add(finalSlot); // 自動展開該儲位方便確認
+    saveState();
+    renderMedList();
+    closeModal('editModal');
+  }
+
+  function confirmDeleteMed() {
+    const id = document.getElementById('editMedId').value;
+    showConfirm('確定要刪除這筆藥品資料嗎？', () => {
+      meds = meds.filter(m => m.id !== id);
+      delete cart[id];
+      delete staging[id];
+      saveState();
+      renderMedList();
+      closeModal('editModal');
+      showToast('已刪除藥品');
+    });
+  }
+
+  // 備份與匯入
+  function openBackupModal() {
+    document.getElementById('backupModal').classList.add('open');
+  }
+
+  function exportData() {
+    const dataStr = JSON.stringify(meds);
+    fallbackCopyText(dataStr, '已複製全部藥品資料庫代碼！可傳給同事匯入');
+  }
+
+  function importData() {
+    const raw = document.getElementById('importInput').value.trim();
+    if (!raw) return showToast('請先貼上資料代碼！');
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        meds = parsed;
+        saveState();
+        renderMedList();
+        closeModal('backupModal');
+        showToast('資料匯入成功！');
+      } else {
+        showToast('格式不正確喔！');
+      }
+    } catch (e) {
+      showToast('代碼解析失敗，請確認有完整複製');
+    }
+  }
+
+  function zoomImage(src) {
+    document.getElementById('zoomedImg').src = src;
+    document.getElementById('imgZoomOverlay').classList.add('open');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('open');
+  }
+
+  // 初始化
+  window.onload = function() {
+    updateBadges();
+    renderMedList();
+  };
+</script>
+</body>
+</html>
