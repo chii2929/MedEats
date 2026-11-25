@@ -122,11 +122,19 @@
   .search-bar {
     position: relative;
     width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .search-input-wrap {
+    position: relative;
+    flex: 1;
   }
 
   .search-bar input {
     width: 100%;
-    padding: 11px 16px 11px 40px;
+    padding: 11px 34px 11px 40px;
     border-radius: 24px;
     border: none;
     background-color: var(--bg-main);
@@ -151,24 +159,89 @@
     font-size: 15px;
   }
 
-  /* Uber Eats 店家橫幅與分類 Tab */
-  .store-banner {
-    background: var(--bg-card);
-    padding: 12px 18px 0;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 103px;
-    z-index: 110;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  .search-clear-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #DCDCDC;
+    border: none;
+    color: var(--text-primary);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 800;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
   }
 
-  .store-meta {
+  .search-nav-controls {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .search-match-count {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  .btn-search-next {
+    background-color: var(--ue-black);
+    color: #FFF;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-search-next:active {
+    opacity: 0.8;
+  }
+
+  /* 螢光筆高亮與目前跳轉焦點 */
+  mark.search-hl {
+    background-color: #FFE566;
+    color: #000000;
+    padding: 0 2px;
+    border-radius: 4px;
+    font-weight: 800;
+  }
+
+  .med-card.search-focus {
+    box-shadow: 0 0 0 2.5px #FFB300, 0 4px 14px rgba(255, 179, 0, 0.25);
+    background-color: #FFFDF2;
+  }
+
+  /* 店家評分提示列 (會隨頁面向上滑出消失，不佔用吸頂空間) */
+  .store-meta-bar {
+    background: var(--bg-card);
+    padding: 10px 18px 4px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: 12px;
     color: var(--text-secondary);
-    margin-bottom: 10px;
+  }
+
+  /* 吸頂分區導覽 Tab */
+  .sticky-zone-bar {
+    background: var(--bg-card);
+    padding: 0 18px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 102px;
+    z-index: 110;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   }
 
   .store-rating {
@@ -231,7 +304,7 @@
 
   .accordion-group.open .accordion-header {
     position: sticky;
-    top: 185px;
+    top: 144px;
     z-index: 90;
     border-radius: 16px 16px 0 0;
     border-bottom: 1px solid var(--border);
@@ -295,16 +368,17 @@
 
   /* Uber Eats 餐點橫向卡片 */
   .med-card {
-    padding: 14px 8px;
-    margin: 0 -8px;
+    padding: 14px 10px;
+    margin: 2px -6px;
     border-radius: 12px;
     border-bottom: 1px solid var(--border);
+    border-left: 4px solid transparent;
     display: flex;
     justify-content: space-between;
     gap: 14px;
     align-items: center;
     cursor: pointer;
-    transition: background-color 0.15s;
+    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
   }
 
   .med-card:not(.sortable-mode):active {
@@ -312,7 +386,9 @@
   }
 
   .med-card.selected {
-    background-color: #F6FBF8;
+    background-color: #F2FBF6;
+    border-left: 4px solid #06C167;
+    box-shadow: 0 2px 8px rgba(6, 193, 103, 0.12);
   }
 
   .med-card:last-child {
@@ -635,7 +711,7 @@
     max-width: 760px;
     max-height: 90vh;
     border-radius: 20px 20px 0 0;
-    padding: 20px;
+    padding: 0 20px 20px;
     overflow-y: auto;
     animation: slideUp 0.25s ease-out;
   }
@@ -649,7 +725,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: var(--bg-card);
+    padding: 20px 0 14px;
     border-bottom: 1px solid var(--border);
     margin-bottom: 16px;
   }
@@ -698,6 +778,49 @@
     margin-top: 3px;
   }
 
+  /* 清單與暫存區按櫃位分隔區塊樣式 */
+  .modal-slot-section {
+    margin-bottom: 16px;
+    background-color: var(--bg-main);
+    border-radius: 14px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+  }
+
+  .modal-slot-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    border-bottom: 1.5px solid #E2E2E2;
+  }
+
+  .modal-slot-badge {
+    background-color: var(--ue-black);
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .modal-slot-badge.staging {
+    background-color: var(--warning);
+  }
+
+  .modal-slot-count {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+
+  .modal-slot-section .list-item:last-child {
+    border-bottom: none;
+    padding-bottom: 4px;
+  }
+
   .btn-move-staging {
     background-color: var(--warning-light);
     color: var(--warning);
@@ -720,6 +843,47 @@
     font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
+  }
+
+  .item-action-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .btn-remove-item {
+    background-color: #EAEAEA;
+    color: var(--text-secondary);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-remove-item:active {
+    background-color: #D5D5D5;
+    color: var(--danger);
+  }
+
+  .cart-footer-actions {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cart-footer-row {
+    display: flex;
+    gap: 8px;
   }
 
   /* 表單樣式 */
@@ -893,17 +1057,26 @@
     </div>
   </div>
   <div class="search-bar">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="在調劑台內搜尋原廠名、台廠名、學名..." oninput="renderMedList()">
+    <div class="search-input-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="搜尋原廠名、台廠名、學名..." oninput="handleSearchInput()">
+      <button type="button" class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()" title="清除搜尋">✕</button>
+    </div>
+    <div class="search-nav-controls" id="searchNavControls">
+      <span class="search-match-count" id="searchMatchCount">0/0</span>
+      <button type="button" class="btn-search-next" onclick="jumpToNextMatch()">▼ 下一筆</button>
+    </div>
   </div>
 </header>
 
-<!-- Uber Eats 店家資訊與分區導覽 -->
-<div class="store-banner">
-  <div class="store-meta">
-    <span><span class="store-rating">★ 5.0</span> (準時下班調劑台) · 點擊儲位展開清單</span>
-    <button class="btn-edit-mini" onclick="toggleAllSlots()">全部展開/收合</button>
-  </div>
+<!-- 店家資訊提示列 (隨頁面滑出) -->
+<div class="store-meta-bar">
+  <span><span class="store-rating">★ 5.0</span> (準時下班調劑台) · 點擊儲位展開清單</span>
+  <button class="btn-edit-mini" onclick="toggleAllSlots()">全部展開/收合</button>
+</div>
+
+<!-- 吸頂分區導覽 -->
+<div class="sticky-zone-bar">
   <div class="zone-tabs" id="zoneTabs">
     <button class="zone-tab active" data-zone="ALL" onclick="selectZone('ALL')">全部儲位</button>
     <button class="zone-tab" data-zone="TOP" onclick="selectZone('TOP')">上層 (D區)</button>
@@ -940,9 +1113,12 @@
       <button class="btn-close" onclick="closeModal('cartModal')">✕</button>
     </div>
     <div id="cartListContainer"></div>
-    <div style="margin-top: 18px; display: flex; gap: 10px;">
-      <button class="btn-pill-gray" style="flex:1; padding: 13px;" onclick="copyCartText()">📋 複製純文字清單</button>
-      <button class="btn-pill-black" style="flex:1; padding: 13px;" onclick="confirmClearCart()">清空訂單</button>
+    <div class="cart-footer-actions">
+      <button class="btn-pill-gray" style="width:100%; padding: 12px;" onclick="copyCartText()">📋 複製純文字清單</button>
+      <div class="cart-footer-row">
+        <button class="btn-pill-black" style="flex:1; padding: 13px;" onclick="confirmClearCart()">清空訂單</button>
+        <button class="btn-pill-black" style="flex:1.35; padding: 13px; background: var(--warning); color: #FFF;" onclick="confirmMoveAllToStaging()">整批已拿取 ➔</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1378,6 +1554,8 @@
   }
 
   let currentZone = 'ALL';
+  let searchMatchIds = [];
+  let currentMatchIdx = -1;
 
   function saveState() {
     try {
@@ -1510,37 +1688,112 @@
     reorderMedInSlot(slot, medId, slotItems[targetPos].id);
   }
 
+  function escapeRegExp(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function highlightText(text, keyword) {
+    if (!text || !keyword) return text || '';
+    const regex = new RegExp(`(${escapeRegExp(keyword)})`, 'gi');
+    return text.replace(regex, '<mark class="search-hl">$1</mark>');
+  }
+
+  function handleSearchInput() {
+    const keyword = document.getElementById('searchInput').value.trim();
+    document.getElementById('searchClearBtn').style.display = keyword ? 'flex' : 'none';
+    currentMatchIdx = -1;
+    renderMedList();
+    if (searchMatchIds.length > 0) {
+      jumpToNextMatch();
+    }
+  }
+
+  function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchClearBtn').style.display = 'none';
+    searchMatchIds = [];
+    currentMatchIdx = -1;
+    renderMedList();
+  }
+
+  function jumpToNextMatch() {
+    if (searchMatchIds.length === 0) return;
+    currentMatchIdx = (currentMatchIdx + 1) % searchMatchIds.length;
+    const targetId = searchMatchIds[currentMatchIdx];
+    const targetMed = meds.find(m => m.id === targetId);
+    if (targetMed && !expandedSlots.has(targetMed.slot)) {
+      expandedSlots.add(targetMed.slot);
+      renderMedList();
+    }
+    updateSearchNavUI();
+
+    const cardEl = document.querySelector(`.med-card[data-med-id="${targetId}"]`);
+    if (cardEl) {
+      document.querySelectorAll('.med-card.search-focus').forEach(el => el.classList.remove('search-focus'));
+      cardEl.classList.add('search-focus');
+      const rect = cardEl.getBoundingClientRect();
+      const offsetTop = window.pageYOffset + rect.top - 205;
+      window.scrollTo({ top: Math.max(0, offsetTop), behavior: 'smooth' });
+    }
+  }
+
+  function updateSearchNavUI() {
+    const navEl = document.getElementById('searchNavControls');
+    const countEl = document.getElementById('searchMatchCount');
+    const keyword = document.getElementById('searchInput').value.trim();
+    if (!keyword) {
+      navEl.style.display = 'none';
+      return;
+    }
+    navEl.style.display = 'flex';
+    if (searchMatchIds.length === 0) {
+      countEl.innerText = '0/0';
+    } else {
+      const displayIdx = currentMatchIdx >= 0 ? currentMatchIdx + 1 : 1;
+      countEl.innerText = `${displayIdx}/${searchMatchIds.length}`;
+    }
+  }
+
   function renderMedList() {
     const container = document.getElementById('medListContainer');
     const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
     container.innerHTML = '';
 
-    // 過濾藥品
-    const filtered = meds.filter(m => {
+    // 過濾區域 (搜尋關鍵字時不隱藏其他藥品，而是高亮與跳轉)
+    const zoneFiltered = meds.filter(m => {
       if (currentZone !== 'ALL' && m.zone !== currentZone) return false;
-      if (keyword) {
-        const text = `${m.brand} ${m.actual} ${m.generic} ${m.note} ${m.slot}`.toLowerCase();
-        return text.includes(keyword);
-      }
       return true;
     });
 
-    if (filtered.length === 0) {
-      container.innerHTML = `<div style="text-align:center; padding: 48px 0; color: var(--text-secondary); font-weight:600;">找不到符合的藥品，點右上角「＋ 新增藥品」即可建立喔！</div>`;
+    searchMatchIds = [];
+    const matchedSlots = new Set();
+    if (keyword) {
+      zoneFiltered.forEach(m => {
+        const text = `${m.brand} ${m.actual} ${m.generic} ${m.note} ${m.slot}`.toLowerCase();
+        if (text.includes(keyword)) {
+          searchMatchIds.push(m.id);
+          matchedSlots.add(m.slot);
+        }
+      });
+    }
+    updateSearchNavUI();
+
+    if (zoneFiltered.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding: 48px 0; color: var(--text-secondary); font-weight:600;">目前此分區尚無藥品，點右上角「＋ 新增藥品」即可建立喔！</div>`;
       return;
     }
 
     // 依儲位分組顯示
     const grouped = {};
-    filtered.forEach(m => {
+    zoneFiltered.forEach(m => {
       if (!grouped[m.slot]) grouped[m.slot] = [];
       grouped[m.slot].push(m);
     });
 
     Object.keys(grouped).forEach(slot => {
       const items = grouped[slot];
-      // 若有搜尋關鍵字，自動展開符合的格位
-      const isOpen = keyword.length > 0 || expandedSlots.has(slot);
+      // 若該格位有搜尋符合的藥品，自動展開方便檢視
+      const isOpen = matchedSlots.has(slot) || expandedSlots.has(slot);
       const selectedInSlot = items.filter(m => (cart[m.id] || 0) > 0).length;
 
       const groupEl = document.createElement('div');
@@ -1551,7 +1804,7 @@
       headerEl.onclick = () => toggleSlotAccordion(slot);
       headerEl.innerHTML = `
         <div class="accordion-title-wrap">
-          <span class="slot-badge-lg">${slot}</span>
+          <span class="slot-badge-lg">${highlightText(slot, keyword)}</span>
           <span class="slot-count-text">共 ${items.length} 項</span>
           ${selectedInSlot > 0 ? `<span class="slot-selected-pill">已選 ${selectedInSlot}</span>` : ''}
         </div>
@@ -1581,9 +1834,13 @@
       items.forEach(m => {
         const inCartQty = cart[m.id] || 0;
         const displayImg = m.img || generateBrandBoxSvg(m.brand, m.note, m.zone);
+        const isFocused = keyword && searchMatchIds[currentMatchIdx] === m.id;
 
         const card = document.createElement('div');
-        card.className = 'med-card' + (isSorting ? ' sortable-mode' : '') + (!isSorting && inCartQty > 0 ? ' selected' : '');
+        card.className = 'med-card'
+          + (isSorting ? ' sortable-mode' : '')
+          + (!isSorting && inCartQty > 0 ? ' selected' : '')
+          + (isFocused ? ' search-focus' : '');
         card.dataset.medId = m.id;
 
         if (!isSorting) {
@@ -1673,11 +1930,11 @@
           ${dragHandleHtml}
           <div class="med-info">
             <div class="med-brand">
-              <span>${m.brand}</span>
-              ${m.note ? `<span class="tag-note">${m.note}</span>` : ''}
+              <span>${highlightText(m.brand, keyword)}</span>
+              ${m.note ? `<span class="tag-note">${highlightText(m.note, keyword)}</span>` : ''}
             </div>
-            ${m.actual ? `<div class="med-actual">院內/別稱：${m.actual}</div>` : ''}
-            <div class="med-generic">${m.generic || '尚未填寫學名'}</div>
+            ${m.actual ? `<div class="med-actual">院內/別稱：${highlightText(m.actual, keyword)}</div>` : ''}
+            <div class="med-generic">${m.generic ? highlightText(m.generic, keyword) : '尚未填寫學名'}</div>
             ${!isSorting ? `<button class="btn-edit-mini" onclick="event.stopPropagation(); openEditModal('${m.id}')">編輯 / 換圖</button>` : ''}
           </div>
           <div class="med-visual-wrap">
@@ -1718,43 +1975,102 @@
     renderMedList();
   }
 
-  // 開啟購物車清單
+  // 依照原調劑台順序 (meds 陣列中的實際順序，包含櫃位與櫃內拖曳順序) 取得已選品項並按櫃位分組
+  function getOrderedGroupedItems(sourceMap) {
+    const groups = [];
+    const groupMap = {};
+    meds.forEach(m => {
+      if (sourceMap[m.id]) {
+        if (!groupMap[m.slot]) {
+          groupMap[m.slot] = { slot: m.slot, items: [] };
+          groups.push(groupMap[m.slot]);
+        }
+        groupMap[m.slot].items.push({ med: m, qty: sourceMap[m.id] });
+      }
+    });
+    return groups;
+  }
+
+  // 開啟購物車清單 (按櫃位分隔，直接展開不收合，依原調劑台順序排列)
   function openCartModal() {
     const container = document.getElementById('cartListContainer');
     container.innerHTML = '';
-    const ids = Object.keys(cart);
+    const groups = getOrderedGroupedItems(cart);
 
-    if (ids.length === 0) {
+    if (groups.length === 0) {
       container.innerHTML = `<div style="text-align:center; padding: 30px 0; color: var(--text-secondary); font-weight:600;">目前沒有待補的藥品，快去選購吧！</div>`;
     } else {
-      ids.sort((a, b) => {
-        const medA = meds.find(m => m.id === a);
-        const medB = meds.find(m => m.id === b);
-        return (medA?.slot || '').localeCompare(medB?.slot || '');
-      });
-
-      ids.forEach(id => {
-        const m = meds.find(item => item.id === id);
-        if (!m) return;
-        const qtyText = m.mode === 'count' ? ` × ${cart[id]} 盒/束` : ' (需補)';
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `
-          <div class="list-item-info">
-            <div class="list-item-title">[${m.slot}] ${m.brand} <span style="color:var(--ue-green-dark);">${qtyText}</span></div>
-            <div class="list-item-sub">${m.actual ? m.actual + ' | ' : ''}${m.generic}</div>
+      groups.forEach(group => {
+        const section = document.createElement('div');
+        section.className = 'modal-slot-section';
+        section.innerHTML = `
+          <div class="modal-slot-header">
+            <span class="modal-slot-badge">${group.slot}</span>
+            <span class="modal-slot-count">共 ${group.items.length} 項</span>
           </div>
-          <button class="btn-move-staging" onclick="moveToStaging('${id}')">已拿取(放後方) ➔</button>
         `;
-        container.appendChild(item);
+
+        group.items.forEach(({ med: m, qty }) => {
+          const qtyText = m.mode === 'count' ? ` × ${qty} 盒/束` : ' (需補)';
+          const item = document.createElement('div');
+          item.className = 'list-item';
+          item.innerHTML = `
+            <div class="list-item-info">
+              <div class="list-item-title">${m.brand} <span style="color:var(--ue-green-dark);">${qtyText}</span></div>
+              <div class="list-item-sub">${m.actual ? m.actual + ' | ' : ''}${m.generic}</div>
+            </div>
+            <div class="item-action-group">
+              <button class="btn-done-staging" onclick="directShelveFromCart('${m.id}')">✓ 直接上架</button>
+              <button class="btn-move-staging" onclick="moveToStaging('${m.id}')">放後方 ➔</button>
+              <button class="btn-remove-item" onclick="removeFromCart('${m.id}')" title="移除此項">✕</button>
+            </div>
+          `;
+          section.appendChild(item);
+        });
+
+        container.appendChild(section);
       });
     }
     document.getElementById('cartModal').classList.add('open');
   }
 
+  // 直接從待補清單上架歸位 (不進入後方暫存區)
+  function directShelveFromCart(id) {
+    delete cart[id];
+    saveState();
+    renderMedList();
+    openCartModal();
+    showToast('已直接上架歸位！');
+  }
+
+  // 從待補清單移除單筆項目
+  function removeFromCart(id) {
+    delete cart[id];
+    saveState();
+    renderMedList();
+    openCartModal();
+    showToast('已從待補清單移除');
+  }
+
+  // 整批已拿取（全部移至後方暫存區）
+  function confirmMoveAllToStaging() {
+    const ids = Object.keys(cart);
+    if (ids.length === 0) return showToast('目前沒有待補的藥品喔！');
+    showConfirm(`確定將全部 ${ids.length} 項藥品移至後方暫存區嗎？`, () => {
+      ids.forEach(id => {
+        staging[id] = (staging[id] || 0) + cart[id];
+        delete cart[id];
+      });
+      saveState();
+      renderMedList();
+      closeModal('cartModal');
+      showToast(`已將 ${ids.length} 項全部移至後方暫存區`);
+    });
+  }
+
   // 移至後方暫存區
   function moveToStaging(id) {
-    staging[id] = cart[id];
+    staging[id] = (staging[id] || 0) + cart[id];
     delete cart[id];
     saveState();
     renderMedList();
@@ -1762,29 +2078,40 @@
     showToast('已移至後方暫存區');
   }
 
-  // 開啟後方暫存區
+  // 開啟後方暫存區 (按櫃位分隔，直接展開不收合，依原調劑台順序排列)
   function openStagingModal() {
     const container = document.getElementById('stagingListContainer');
     container.innerHTML = '';
-    const ids = Object.keys(staging);
+    const groups = getOrderedGroupedItems(staging);
 
-    if (ids.length === 0) {
+    if (groups.length === 0) {
       container.innerHTML = `<div style="text-align:center; padding: 30px 0; color: var(--text-secondary); font-weight:600;">太棒了！後方沒有堆積未補上的藥品。</div>`;
     } else {
-      ids.forEach(id => {
-        const m = meds.find(item => item.id === id);
-        if (!m) return;
-        const qtyText = m.mode === 'count' ? ` × ${staging[id]} 盒/束` : '';
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `
-          <div class="list-item-info">
-            <div class="list-item-title">歸位至 ➔ <span style="color:var(--warning);">${m.slot}</span> | ${m.brand}${qtyText}</div>
-            <div class="list-item-sub">${m.actual ? m.actual + ' | ' : ''}${m.generic}</div>
+      groups.forEach(group => {
+        const section = document.createElement('div');
+        section.className = 'modal-slot-section';
+        section.innerHTML = `
+          <div class="modal-slot-header">
+            <span class="modal-slot-badge staging">歸位 ➔ ${group.slot}</span>
+            <span class="modal-slot-count">共 ${group.items.length} 項</span>
           </div>
-          <button class="btn-done-staging" onclick="completeStaging('${id}')">✓ 已上架完成</button>
         `;
-        container.appendChild(item);
+
+        group.items.forEach(({ med: m, qty }) => {
+          const qtyText = m.mode === 'count' ? ` × ${qty} 盒/束` : '';
+          const item = document.createElement('div');
+          item.className = 'list-item';
+          item.innerHTML = `
+            <div class="list-item-info">
+              <div class="list-item-title">${m.brand}<span style="color:var(--warning);">${qtyText}</span></div>
+              <div class="list-item-sub">${m.actual ? m.actual + ' | ' : ''}${m.generic}</div>
+            </div>
+            <button class="btn-done-staging" onclick="completeStaging('${m.id}')">✓ 已上架完成</button>
+          `;
+          section.appendChild(item);
+        });
+
+        container.appendChild(section);
       });
     }
     document.getElementById('stagingModal').classList.add('open');
@@ -1816,16 +2143,17 @@
   }
 
   function copyCartText() {
-    const ids = Object.keys(cart);
-    if (ids.length === 0) return showToast('清單是空的喔！');
+    const groups = getOrderedGroupedItems(cart);
+    if (groups.length === 0) return showToast('清單是空的喔！');
     
     let text = '【MedEats 調劑台補藥清單】\n';
-    ids.forEach(id => {
-      const m = meds.find(item => item.id === id);
-      if (!m) return;
-      const qty = m.mode === 'count' ? ` (${cart[id]}盒/束)` : '';
-      const actual = m.actual ? ` [${m.actual}]` : '';
-      text += `□ ${m.slot}｜${m.brand}${actual}${qty}\n`;
+    groups.forEach(group => {
+      text += `\n【${group.slot}】\n`;
+      group.items.forEach(({ med: m, qty: q }) => {
+        const qty = m.mode === 'count' ? ` (${q}盒/束)` : '';
+        const actual = m.actual ? ` [${m.actual}]` : '';
+        text += `□ ${m.brand}${actual}${qty}\n`;
+      });
     });
     text += '\n— by 段嘟米';
 
